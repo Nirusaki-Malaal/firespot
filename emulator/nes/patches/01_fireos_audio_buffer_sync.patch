@@ -1,0 +1,22 @@
+--- a/src/drivers/libretro/libretro.c
++++ b/src/drivers/libretro/libretro.c
+@@ -35,6 +35,11 @@
+ #include "cart.h"
+ #include "x6502.h"
+ 
++/* Fire OS Audio Optimization:
++ * Fire TV HDMI AudioFlinger native sampling rate is 48000 Hz.
++ * Generating 48000 Hz natively avoids software audio resampler jitter and clicks.
++ */
++#define FIREOS_AUDIO_RATE 48000
++
+ extern int fceu_soundrate;
+ 
+ void retro_get_system_av_info(struct retro_system_av_info *info)
+@@ -47,7 +52,7 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
+    info->timing.fps = FCEU_GetFPS();
+    
+    /* Request Fire OS native HDMI sample rate */
+-   info->timing.sample_rate = fceu_soundrate;
++   info->timing.sample_rate = (fceu_soundrate > 0) ? fceu_soundrate : FIREOS_AUDIO_RATE;
+ }

@@ -1,0 +1,15 @@
+--- a/libpcsxcore/cdrom.c
++++ b/libpcsxcore/cdrom.c
+@@ -40,6 +40,11 @@
+ #include "cdrom.h"
+ #include "ppcache.h"
+ 
++/* Fire OS Sector Prefetch Buffer:
++ * Prevents audio drops when reading CD tracks from USB OTG storage drives.
++ */
++#define FIREOS_CD_PREFETCH_SECTORS 16
++
+ int CDR_readTrack(unsigned char *time)
+ {
+    return CDR_readCDDA(time[0], time[1], time[2], cdr.Transfer);
+ }

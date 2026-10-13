@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FireEmu Suite</string>
+    <string name="banner_desc">Multi-Console Emulation Suite for Amazon Fire TV</string>
+    <string name="consoles_header">Consoles</string>
+    <string name="recent_header">Recently Played</string>
+    <string name="favorites_header">Favorites</string>
+    <string name="all_games_header">Games</string>
+    <string name="search_hint">Search Games (Press Select on Remote)...</string>
+    <string name="settings_title">Settings &amp; Open Source Licenses</string>
+    <string name="storage_picker">Scan Storage / Change ROM Folder</string>
+    
+    <!-- Console Labels -->
+    <string name="console_nes">Nintendo (NES)</string>
+    <string name="console_gameboy">Game Boy / Color (GB/GBC)</string>
+    <string name="console_gba">Game Boy Advance (GBA)</string>
+    <string name="console_ps1">PlayStation 1 (PS1)</string>
+    <string name="console_psp">PlayStation Portable (PSP)</string>
+
+    <!-- Overlay Menu -->
+    <string name="menu_resume">Resume Emulation</string>
+    <string name="menu_save_state">Save State</string>
+    <string name="menu_load_state">Load State</string>
+    <string name="menu_slot">Slot</string>
+    <string name="menu_reset">Reset Console</string>
+    <string name="menu_remap">Controller Remap</string>
+    <string name="menu_preset">Performance Preset</string>
+    <string name="menu_exit">Exit to Menu</string>
+</resources>

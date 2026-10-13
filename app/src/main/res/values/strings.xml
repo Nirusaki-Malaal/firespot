@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FireSpot</string>
+    <string name="banner_desc">FireSpot - Retro Gaming Entertainment Suite for Amazon Fire TV</string>
+    <string name="consoles_header">Consoles &amp; Hardware</string>
+    <string name="recent_header">Continue Playing</string>
+    <string name="favorites_header">My Space &amp; Watchlist</string>
+    <string name="all_games_header">All Games</string>
+    <string name="search_hint">Search Games, Consoles, Genres...</string>
+    <string name="settings_title">FireSpot Settings &amp; System</string>
+    <string name="storage_picker">Scan Storage / Change ROM Folder</string>
+    
+    <!-- Console Labels -->
+    <string name="console_nes">Nintendo Entertainment System</string>
+    <string name="console_gameboy">Game Boy / Game Boy Color</string>
+    <string name="console_gba">Game Boy Advance</string>
+    <string name="console_ps1">Sony PlayStation 1</string>
+    <string name="console_psp">Sony PlayStation Portable</string>
+
+    <!-- Overlay Menu -->
+    <string name="menu_resume">Resume Playing</string>
+    <string name="menu_save_state">Save State</string>
+    <string name="menu_load_state">Load State</string>
+    <string name="menu_slot">Slot</string>
+    <string name="menu_reset">Reset Game</string>
+    <string name="menu_remap">Controller Mapping</string>
+    <string name="menu_preset">Performance Preset</string>
+    <string name="menu_exit">Exit to FireSpot</string>
+</resources>

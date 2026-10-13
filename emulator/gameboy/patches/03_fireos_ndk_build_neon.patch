@@ -1,0 +1,11 @@
+--- a/Makefile.libretro
++++ b/Makefile.libretro
+@@ -62,6 +62,11 @@
+    TARGET := $(TARGET_NAME)_libretro_android.so
+    fpic = -fPIC
+    SHARED := -shared -Wl,--no-undefined
++   # Fire OS ARM NEON optimization
++   ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
++      FLAGS += -march=armv7-a -mfpu=neon -mfloat-abi=softfp -O3 -flto
++   endif
++   FLAGS += -D__ANDROID__ -DFIREOS_AUDIO_RATE=48000

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_dark"
+    android:padding="32dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="OPEN SOURCE LICENSES &amp; ATTRIBUTION"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/accent_gold"
+        android:layout_marginBottom="16dp" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:focusable="true">
+
+        <TextView
+            android:id="@+id/tv_licenses_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:lineSpacingExtra="4dp" />
+    </ScrollView>
+
+    <Button
+        android:id="@+id/btn_licenses_back"
+        android:layout_width="200dp"
+        android:layout_height="48dp"
+        android:text="Back to Launcher"
+        android:textColor="@color/text_primary"
+        android:background="@drawable/card_focus_selector"
+        android:focusable="true"
+        android:layout_marginTop="16dp" />
+</LinearLayout>

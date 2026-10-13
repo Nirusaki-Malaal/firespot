@@ -1,0 +1,21 @@
+--- a/frontend/libretro.c
++++ b/frontend/libretro.c
+@@ -80,6 +80,11 @@
+ #define DEFAULT_SAMPLERATE 44100
+ #endif
+ 
++/* Fire OS Hardware Configuration:
++ * Force Ari64 ARMv7 dynarec and NEON GPU rasterization for Cortex-A53/A55.
++ */
++#define FIREOS_HDMI_SAMPLERATE 48000
++
+ static retro_video_refresh_t video_cb;
+ static retro_audio_sample_t audio_cb;
+ static retro_audio_sample_batch_t audio_batch_cb;
+@@ -115,7 +120,7 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
+    info->geometry.max_height   = 512;
+    info->geometry.aspect_ratio = 4.0 / 3.0;
+    info->timing.fps            = pl_get_field_rate();
+-   info->timing.sample_rate    = DEFAULT_SAMPLERATE;
++   info->timing.sample_rate    = FIREOS_HDMI_SAMPLERATE;
+ }

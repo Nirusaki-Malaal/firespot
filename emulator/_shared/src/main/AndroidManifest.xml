@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.fireemu.launcher"
+    android:versionCode="1"
+    android:versionName="1.0.0">
+
+    <!-- Fire OS 7/8 Hard Constraints: minSdk 28, targetSdk 30-33 -->
+    <uses-sdk
+        android:minSdkVersion="28"
+        android:targetSdkVersion="30" />
+
+    <!-- Fire OS / Android TV Hardware Feature Declarations: Zero touchscreen dependency -->
+    <uses-feature
+        android:name="android.software.leanback"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.gamepad"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false" />
+
+    <!-- Storage & Audio Permissions (Internal + USB OTG) -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:banner="@drawable/banner"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.FireEmu"
+        android:requestLegacyExternalStorage="true"
+        android:hardwareAccelerated="true"
+        android:isGame="true">
+
+        <!-- Main Leanback TV Launcher Activity -->
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
+            android:launchMode="singleTask"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Emulator Viewport Activity: Running in isolated process :game to free launcher RAM -->
+        <activity
+            android:name=".EmulatorActivity"
+            android:process=":game"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
+            android:exported="false" />
+
+        <!-- Open Source Licenses Activity -->
+        <activity
+            android:name=".ui.LicensesActivity"
+            android:screenOrientation="landscape"
+            android:exported="false" />
+    </application>
+</manifest>

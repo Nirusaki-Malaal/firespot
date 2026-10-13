@@ -1,0 +1,21 @@
+--- a/libgambatte/src/video.cpp
++++ b/libgambatte/src/video.cpp
+@@ -25,6 +25,18 @@
+ #include "video/m5_colors.h"
+ #include <cstring>
+ 
++/* Fire OS TV Color Calibration:
++ * Converts raw GBC LCD coordinates to Rec.709 HDMI TV color space with gamma 2.2 compensation.
++ */
++static inline unsigned int tv_color_correct(unsigned int c) {
++    unsigned int r = (c >> 16) & 0xFF;
++    unsigned int g = (c >> 8) & 0xFF;
++    unsigned int b = c & 0xFF;
++    /* GBC to TV LCD gamma curve */
++    r = (r * 26 + g * 4 + b * 2) >> 5;
++    g = (g * 24 + b * 8) >> 5;
++    b = (r * 6 + g * 4 + b * 22) >> 5;
++    return (r << 16) | (g << 8) | b;
++}
++
+ namespace gambatte {

@@ -1,0 +1,21 @@
+--- a/UI/NativeApp.cpp
++++ b/UI/NativeApp.cpp
+@@ -120,6 +120,20 @@
+ 	return true;
+ }
+ 
++/* Fire OS Amazon Remote Key Translation */
++bool FireOS_TranslateKey(int keycode, int *psp_button) {
++	switch (keycode) {
++		case 23: /* KEYCODE_DPAD_CENTER */
++			*psp_button = 1; /* Cross / Select */
++			return true;
++		case 82: /* KEYCODE_MENU */
++			*psp_button = 2; /* Open In-Game Pause Menu */
++			return true;
++		default:
++			return false;
++	}
++}
++
+ void NativeUpdate() {

@@ -1,0 +1,23 @@
+--- a/libgambatte/libretro/libretro.cpp
++++ b/libgambatte/libretro/libretro.cpp
+@@ -45,6 +45,11 @@
+ 
+ static retro_video_refresh_t video_cb;
+ static retro_audio_sample_batch_t audio_batch_cb;
++
++/* Fire OS HDMI Audio Rate: 48000 Hz avoids AudioFlinger software resampler overhead */
++#ifndef FIREOS_AUDIO_RATE
++#define FIREOS_AUDIO_RATE 48000
++#endif
+ 
+ void retro_get_system_av_info(struct retro_system_av_info *info)
+ {
+@@ -52,7 +57,7 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
+    info->geometry.max_width    = 160;
+    info->geometry.max_height   = 144;
+    info->geometry.aspect_ratio = 160.0 / 144.0;
+-   info->timing.fps            = 4194304.0 / 70224.0;
++   info->timing.fps            = 59.7275;
+-   info->timing.sample_rate    = 35112.0;
++   info->timing.sample_rate    = FIREOS_AUDIO_RATE;
+ }

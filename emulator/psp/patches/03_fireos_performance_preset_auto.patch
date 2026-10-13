@@ -1,0 +1,18 @@
+--- a/Core/System.cpp
++++ b/Core/System.cpp
+@@ -180,6 +180,18 @@
+ void System_Init() {
+ 	// System initialization
+ }
++
++/* Fire OS Device Profile Detection */
++int FireOS_DetectOptimalPreset(const char *model) {
++	if (strstr(model, "AFTMM") || strstr(model, "AFTKA")) {
++		/* Fire TV Stick 4K Max: Performance Mode, 2x resolution, 0 frameskip */
++		return 2; /* Quality / Balanced */
++	} else if (strstr(model, "AFTR") || strstr(model, "AFTSSS")) {
++		/* Fire TV Stick Lite / 3rd Gen: 1x resolution, Auto 1 frameskip */
++		return 0; /* High Performance */
++	}
++	return 1; /* Balanced */
++}

@@ -1,0 +1,16 @@
+--- a/Core/Config.cpp
++++ b/Core/Config.cpp
+@@ -250,6 +250,15 @@
+ 	// Defaults for low-end Fire TV Stick GPUs (PowerVR GE8300)
+ 	bSoftwareSkinning = true;
+ 	bHardwareTransform = true;
++	
++	/* Fire OS Hardware Defaults:
++	 * Avoid Vulkan instability on PowerVR GE8300; default to OpenGL ES.
++	 */
++	iGPUBackend = 0; /* GPU_BACKEND_OPENGL */
++	iInternalResolution = 1; /* 1x PSP native (480x272) upscaled to 720p/1080p */
++	bDisableSlowFramebufEffects = true;
++	bVertexCache = true;
++	iFrameSkip = 1; /* Auto-frameskip enabled for base Stick models */
+ }

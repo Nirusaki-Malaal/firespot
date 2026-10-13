@@ -1,0 +1,16 @@
+--- a/src/platform/libretro/libretro.c
++++ b/src/platform/libretro/libretro.c
+@@ -210,6 +210,14 @@
+ 
+ void retro_run(void) {
++	/* Fire OS LifeCycle Check:
++	 * If system triggered Alexa overlay or HDMI-CEC standby, skip heavy execution.
++	 */
++	extern int g_fireos_suspended;
++	if (g_fireos_suspended) {
++		return;
++	}
++
+ 	bool updated = false;
+ 	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated) {
+ 		check_variables();

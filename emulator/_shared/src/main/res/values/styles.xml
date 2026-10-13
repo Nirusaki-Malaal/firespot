@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TV Leanback Application Theme -->
+    <style name="Theme.FireEmu" parent="@android:style/Theme.NoTitleBar.Fullscreen">
+        <item name="android:windowBackground">@color/bg_dark</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowOverscan">true</item>
+    </style>
+
+    <style name="FocusableCard">
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">false</item>
+        <item name="android:background">@drawable/card_focus_selector</item>
+        <item name="android:padding">12dp</item>
+    </style>
+</resources>

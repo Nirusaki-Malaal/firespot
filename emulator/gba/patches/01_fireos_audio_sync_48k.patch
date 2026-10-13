@@ -1,0 +1,21 @@
+--- a/src/platform/libretro/libretro.c
++++ b/src/platform/libretro/libretro.c
+@@ -50,6 +50,11 @@
+ #define DEFAULT_SAMPLERATE 44100
+ #endif
+ 
++/* Fire OS HDMI Audio Optimization */
++#ifndef FIREOS_SAMPLERATE
++#define FIREOS_SAMPLERATE 48000
++#endif
++
+ static retro_video_refresh_t video_cb;
+ static retro_audio_sample_t audio_cb;
+ static retro_audio_sample_batch_t audio_batch_cb;
+@@ -80,7 +85,7 @@ void retro_get_system_av_info(struct retro_system_av_info* info) {
+ 	info->geometry.aspect_ratio = 3.0 / 2.0;
+ 
+ 	info->timing.fps = GBA_ARM7TDMI_FREQUENCY / (float) VIDEO_TOTAL_LENGTH;
+-	info->timing.sample_rate = DEFAULT_SAMPLERATE;
++	info->timing.sample_rate = FIREOS_SAMPLERATE;
+ }

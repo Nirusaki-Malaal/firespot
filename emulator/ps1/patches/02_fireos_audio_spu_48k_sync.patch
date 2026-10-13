@@ -1,0 +1,13 @@
+--- a/plugins/gpulib/gpu.c
++++ b/plugins/gpulib/gpu.c
+@@ -32,6 +32,12 @@
+ #include "gpu.h"
+ 
++/* Fire OS Display & Performance Options */
++int g_fireos_enhanced_res = 0; /* 0 = Native 240p, 1 = Enhanced 480p */
++int g_fireos_dither_mode = 0;  /* 0 = Dithering disabled for speed */
++
+ void gpu_set_frameskip(int frameskip)
+ {
+    pl_vout_set_frameskip(frameskip);
+ }
