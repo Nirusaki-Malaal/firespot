@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.fireemu.data.catalog.CatalogSecurityTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-22T11:20:50" hostname="nirusaki" time="0.456">
+  <properties/>
+  <testcase name="signedCatalogRejectsTamperingAndWrongPublisher" classname="com.fireemu.data.catalog.CatalogSecurityTest" time="0.435"/>
+  <testcase name="redirectsCannotEscapeToHttpOrAnUntrustedHost" classname="com.fireemu.data.catalog.CatalogSecurityTest" time="0.008"/>
+  <testcase name="validHashDoesNotHideWrongCpuOrTruncation" classname="com.fireemu.data.catalog.CatalogSecurityTest" time="0.011"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

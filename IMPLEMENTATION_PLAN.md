@@ -2,6 +2,14 @@
 
 Phase 0 now has a self-contained demo APK with a Game Boy core and two original games, plus a separate standard APK without emulator cores. The monochrome launcher exposes implemented features only. Builds, lint, host emulation, artifact integrity, and the local Android walkthrough pass. Official Fire TV runtime acceptance is pending. See [current evidence and setup](docs/PHASE_0.md); roadmap entries below remain proposals unless that record marks them verified.
 
+## Current delivery milestones
+
+- Phase 1: signed on-demand core packages, original homebrew discovery and keyboard support are implemented and exercised on local Android. Public binaries/source: https://github.com/Nirusaki-Malaal/firespot-cores.
+- Phase 2 initiated: console/genre filters, cartridge RAM persistence, rotating autosaves and input cleanup. Family profiles, multiplayer, cloud saves, a storage manager and broad console gameplay validation remain future work.
+- Phase 3 initiated: public source/meaningful commits, CI, signed release automation, screenshots, technical docs and a submission guide. Official Fire TV acceptance and the final demo video remain required.
+
+Detailed implemented behavior: [documentation](docs/DOCUMENTATION.md). Measured/tested boundaries: [validation](docs/VALIDATION.md). These milestones distinguish shipped functionality from the larger P1/P2 proposals below.
+
 ## Product vision
 
 Turn a Fire OS TV into an easy-to-use retro gaming hub: bring a game, let FireSpot prepare its console, and start playing. A person should not need to understand ROM extensions, CPU architectures, emulator cores, or filesystem paths to use the main flow.

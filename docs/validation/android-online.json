@@ -1,0 +1,41 @@
+{
+  "scope": "Local AOSP Android 11 x86_64; not official Fire TV or physical Bluetooth",
+  "checks": [
+    {
+      "check": "Core-free APK downloads the signed CPU-specific Gambatte core and runs a game",
+      "result": "passed"
+    },
+    {
+      "check": "Keyboard WASD moves; Escape pauses; keyboard guide opens",
+      "result": "passed"
+    },
+    {
+      "check": "Physical keyboard typing searches the library; Escape navigates back",
+      "result": "passed"
+    },
+    {
+      "check": "Signed remote catalog refresh",
+      "result": "passed"
+    },
+    {
+      "check": "Catalog downloads a new original game; it launches and writes 8 KiB cartridge RAM",
+      "result": "passed"
+    },
+    {
+      "check": "Rotating autosave retains the previous checkpoint",
+      "result": "passed"
+    },
+    {
+      "check": "Downloaded core/game and autosave survive an app process restart",
+      "result": "passed"
+    },
+    {
+      "check": "Library console/genre filters apply and clear",
+      "result": "passed"
+    },
+    {
+      "check": "Known cartridge RAM score reloads and survives Play from start independently of snapshots",
+      "result": "passed"
+    }
+  ]
+}
