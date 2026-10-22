@@ -45,7 +45,7 @@ def main():
     # SurfaceView has no text; dump synchronizes with the new activity.
     tree();shot('orbit-game')
     key('KEYCODE_MENU');wait('Resume playing');shot('pause');passed('Native game launch and pause')
-    click('Controls guide');wait('Game Boy controls');key('KEYCODE_BACK');wait('Resume playing');passed('Controls guide')
+    click('Controls guide');wait('Game controls');key('KEYCODE_BACK');wait('Resume playing');passed('Controls guide')
     click('Overwrite Slot' if any('Overwrite Slot' in x for x in texts(tree())) else 'Save State');tree()
     files=shell('run-as','com.fireemu.demo','ls','files/states/gameboy')
     assert 'orbit-collector.gb.state1' in files,files

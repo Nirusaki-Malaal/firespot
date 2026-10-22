@@ -22,7 +22,7 @@ assert 'btn_0' in prefs and 'value="90"' in prefs,prefs
 u.click('Reset Defaults');u.wait('KEYCODE_BUTTON_B');u.passed('Remapping captures a real key, persists, and resets')
 u.key('KEYCODE_BACK');u.wait('Make yourself at home.')
 u.adb('push','app/src/main/assets/starter/orbit-collector.gb','/sdcard/Download/OrbitImport.gb')
-u.click('Import Game Boy ROM');t=u.tree()
+u.click('Import a game');t=u.tree()
 print('IMPORT PICKER:',u.texts(t),flush=True)
 u.shot('import-picker')
 

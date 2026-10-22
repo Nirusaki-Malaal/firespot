@@ -21,13 +21,13 @@ Open **Library** to play, or **Discover games** to get another original title. N
 
 ## Features
 
-- **Discover:** original downloadable homebrew and signed, CPU-specific emulator packages.
+- **Discover:** console browsing, catalog search, installed-only filtering, sorting and signed emulator packages.
 - **Library:** search, favorites, recent games, console/genre filters and cartridge import.
 - **Progress:** four save slots, resume, rotating autosaves, recovery and cartridge battery saves.
 - **Controls:** remote navigation, gamepad remapping, keyboard play and typed search.
 - **Display:** aspect ratio, integer/fill scaling, optional frame counter and restrained glass styling.
 
-Game Boy gameplay is verified on a local Android emulator. NES, GBA and PlayStation core packages are experimental; official Fire TV and physical wireless-device testing are pending. See the [console matrix](docs/CONSOLES.md) and [validation record](docs/VALIDATION.md).
+Game Boy gameplay is verified on a local Android emulator. NES, GBA, PlayStation, SNES and Sega 8-bit core packages are experimental; official Fire TV and physical wireless-device testing are pending. See the [console matrix](docs/CONSOLES.md) and [validation record](docs/VALIDATION.md).
 
 ## Build
 
@@ -38,7 +38,7 @@ JDK 17, Android SDK 34 and NDK 28.2.13676358:
 ./gradlew :app:assembleStandardDebug :app:assembleDemoDebug
 ```
 
-[Detailed development guide](docs/DOCUMENTATION.md) · [CI and signed releases](docs/CI_CD.md) · [Hackathon guide](docs/HACKATHON.md) · [Roadmap](IMPLEMENTATION_PLAN.md)
+[Library and sources](docs/LIBRARY_SOURCES.md) · [Detailed development guide](docs/DOCUMENTATION.md) · [CI and signed releases](docs/CI_CD.md) · [Hackathon guide](docs/HACKATHON.md) · [Roadmap](IMPLEMENTATION_PLAN.md)
 
 ## License
 

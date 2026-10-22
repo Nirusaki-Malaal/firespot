@@ -54,7 +54,7 @@ The public core repository hosts native binaries, exact corresponding source, li
 5. Publish all referenced release assets before shipping an APK that points to them.
 6. Verify unauthenticated downloads with scripts/verify_online_release.py and the real Android flow.
 
-The current app uses the explicit phase1-v1 catalog endpoint. Adding a new catalog release also needs the app endpoint/revision policy updated intentionally. Offline cached metadata does not grant arbitrary remote code execution privileges: catalog URLs and artifact bounds are still checked, and the code runs only through the supported native frontend.
+The current app uses the explicit phase1-v2 catalog endpoint. Adding a new catalog release also needs the app endpoint/revision policy updated intentionally. Offline cached metadata does not grant arbitrary remote code execution privileges: catalog URLs and artifact bounds are still checked, and the code runs only through the supported native frontend.
 
 ## History and contribution policy
 

@@ -4,7 +4,7 @@ There is no fixed maximum console count in the Libretro architecture. A system n
 
 ## Published now
 
-The [phase1-v1 release](https://github.com/Nirusaki-Malaal/firespot-cores/releases/tag/phase1-v1) contains four real cores and 12 Android binaries: ARMv7, ARM64 and x86_64 for each.
+The [phase1-v2 release](https://github.com/Nirusaki-Malaal/firespot-cores/releases/tag/phase1-v2) contains six real cores and 18 Android binaries: ARMv7, ARM64 and x86_64 for each.
 
 | System | Core | FireSpot status |
 |---|---|---|
@@ -12,6 +12,10 @@ The [phase1-v1 release](https://github.com/Nirusaki-Malaal/firespot-cores/releas
 | Game Boy Color | Gambatte | Same installed core; Color-specific game coverage pending |
 | NES / Famicom | FCEUmm | Published experimental Android build; cartridge import enabled; gameplay pending |
 | Game Boy Advance | mGBA | Published experimental Android build; cartridge import enabled; gameplay pending |
+| SNES / Super Famicom | bsnes 2014 Performance | Android native initialization checked; gameplay/device tests pending |
+| Master System | Gearsystem | Android native initialization checked; gameplay/device tests pending |
+| Game Gear | Gearsystem | Same core; gameplay/device tests pending |
+| SG-1000 | Gearsystem | Same core; gameplay/device tests pending |
 | PlayStation | PCSX ReARMed | Published experimental Android build; gameplay/BIOS/disc-import workflow pending |
 
 Gambatte is the only core included in the optional demo APK. Standard downloads console support. The public release includes each core's exact source archive, commit and license. No BIOS or commercial ROMs are supplied.
@@ -22,7 +26,7 @@ These are integration candidates based on the Libretro ecosystem, not features a
 
 | Group | Candidate systems | Main remaining work |
 |---|---|---|
-| Additional 8/16-bit consoles | SNES/Super Famicom, Mega Drive/Genesis, Master System, Game Gear, SG-1000 | Select/pin/build/license-review cores, import formats, controls and real game tests |
+| Additional 8/16-bit consoles | Mega Drive/Genesis | Select/pin/build/license-review cores, import formats, controls and real game tests |
 | Older cartridge consoles | Atari 2600/5200/7800, ColecoVision, Intellivision, Vectrex | Core integration, unusual controller layouts, optional firmware and device tests |
 | Handhelds | Atari Lynx, Neo Geo Pocket/Color, WonderSwan/Color, Pokémon Mini | Core integration, orientation and controls |
 | CD and add-ons | PC Engine/TurboGrafx-16/CD, Sega CD, Sega 32X | Content sidecars/playlists, firmware where required, storage and save behavior |

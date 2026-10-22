@@ -34,7 +34,9 @@ The included titles are intentionally small original checkpoint games. Move the 
 
 Open Discover games from Home or Discover games & console support from Settings. The Games tab shows title, description, console, author, license and size. An installed starter title opens its existing library record rather than creating another copy. Get downloads an uninstalled title, verifies its bytes, and opens its details.
 
-Console support lists the four published cores. Each package is selected for the running process ABI, rather than assuming a 64-bit-capable CPU means a 64-bit app process. Unsupported ABIs have no install action. Experimental packages are labeled: a compiled core is not proof of gameplay, BIOS readiness or Fire TV performance.
+Discover has Games, Consoles, Installed and Console support views. Search by title, description, author or genre; filter by console and sort alphabetically, by download size or release year. Console cards show actual catalog and installed-game counts. An empty system offers an import action.
+
+Console support lists the six published cores. Each package is selected for the running process ABI, rather than assuming a 64-bit-capable CPU means a 64-bit app process. Unsupported ABIs have no install action. Experimental packages are labeled: a compiled core is not proof of gameplay, BIOS readiness or Fire TV performance.
 
 Refresh catalog fetches the signed remote catalog. A verified embedded catalog remains available offline. A valid newer cached revision takes precedence over the embedded one; rollback to an older revision is rejected. Installed local files remain usable when refresh fails.
 
@@ -42,7 +44,7 @@ Downloads show status, percentage, cancellation and a specific failure message. 
 
 ## Import your cartridges
 
-Settings → Import a game uses the system's Android document provider. Supported imports are `.gb`, `.gbc`, `.nes` and `.gba` cartridges. GB/GBC imports are limited to 8 MiB; NES/GBA imports to 32 MiB. The importer validates basic file shape (including the iNES header/declared payload), bounds reads, hashes content, writes to a temporary file and then renames it. Files are copied into private app storage; losing the original file or picker permission does not remove that copy.
+Settings → Import a game uses the system's Android document provider. Supported imports are `.gb`, `.gbc`, `.nes`, `.gba`, `.sfc`, `.smc`, `.sms`, `.gg` and `.sg` cartridges. GB/GBC imports are limited to 8 MiB; other cartridge imports to 32 MiB. The importer validates basic file shape (including the iNES header/declared payload), bounds reads, hashes content, writes to a temporary file and then renames it. Files are copied into private app storage; losing the original file or picker permission does not remove that copy.
 
 Importing the same bytes again reuses their content-derived destination and library record. Import does not download arbitrary web URLs or treat a filename as proof of compatibility. A cartridge may still fail core loading or use unsupported peripherals. Disc sets, M3U playlists and PS1 CUE/BIN sidecar sets need a separate transfer/import flow and are not exposed as a supported one-file cartridge import.
 
@@ -71,7 +73,7 @@ In launcher menus, arrows/Tab navigate and Enter activates. Printable keys type 
 
 Bluetooth and USB keyboards use Android input events; pairing is performed in the operating system, not inside FireSpot. No Bluetooth scanning permission is required to receive normal keyboard events. Physical Bluetooth latency/reconnection behavior still needs device testing. Input is cleared on focus loss, pause and input-device changes/removal to avoid held directions. Multiple keys mapped to the same game action are tracked separately, so releasing one does not release the other.
 
-Settings → Remap controls captures a key for each exposed Game Boy control. Reset Defaults restores the stored controller defaults; fixed keyboard/remote fallbacks remain available. Menu, Back, Home, Escape and F1 remain navigation/pause keys. Analog stick-to-D-pad conversion uses a fixed dead zone; per-controller calibration and multiple-player routing are future work.
+Settings → Remap controls captures a key for each exposed game control, including X/Y/L/R. Reset Defaults restores the stored controller defaults; fixed keyboard/remote fallbacks remain available. Menu, Back, Home, Escape and F1 remain navigation/pause keys. Analog stick-to-D-pad conversion uses a fixed dead zone; per-controller calibration and multiple-player routing are future work.
 
 ## Saves and recovery
 
@@ -119,7 +121,7 @@ export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/28.2.13676358"
 python3 scripts/build_online_cores.py
 ```
 
-Build scripts fetch fixed upstream commits, preserve core licenses and package corresponding source. They do not fetch commercial games or BIOS. See CI_CD.md for signed release automation, VALIDATION.md for tests, and CONSOLES.md for the honest compatibility boundary.
+Build scripts fetch fixed upstream commits, preserve core licenses and package corresponding source. They do not fetch commercial games or BIOS. See LIBRARY_SOURCES.md for browsing/source boundaries, CI_CD.md for signed release automation, VALIDATION.md for tests, and CONSOLES.md for the honest compatibility boundary.
 
 ## Architecture and trust
 
