@@ -46,3 +46,11 @@ Local Android evidence is not official Fire TV certification. Physical Bluetooth
 - Navigation-owned ViewModels and reusable rail destinations prevent accumulating screen collectors.
 - Artwork memory cache capped at 16 MiB/8% heap; fixed decode bounds and hidden-UI trimming.
 - Software video reuses scaling maps and repeated output rows; all primary native sections share the restrained monochrome finish.
+
+## Version 1.0.0 cloud-feature rebuild · Android versionCode 5
+
+- Added Cognito account creation, email verification, sign-in, and private S3 backup/restore.
+- Added optional Bedrock Knowledge Base retrieval and reference excerpts to Retro Coach.
+- Added Polly spoken responses with Listen/Stop controls and ambient-audio ducking.
+- Added `.env.example`, public connection defaults, and a release build helper.
+- Retained the existing website, GitHub release, and core-catalog endpoint URLs.

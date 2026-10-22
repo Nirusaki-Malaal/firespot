@@ -17,10 +17,21 @@ android {
 
     defaultConfig {
         buildConfigField("boolean", "BUNDLED_CORE", "false")
+        // Public deployment configuration; never supply AWS credentials here.
+        mapOf(
+            "COACH_ENDPOINT" to "coachEndpoint",
+            "CLOUD_ENDPOINT" to "cloudEndpoint",
+            "COGNITO_REGION" to "cognitoRegion",
+            "COGNITO_CLIENT_ID" to "cognitoClientId"
+        ).forEach { (field, property) ->
+            val raw = providers.gradleProperty(property).orElse("").get()
+            val escaped = raw.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r")
+            buildConfigField("String", field, "\"$escaped\"")
+        }
         applicationId = "com.fireemu"
         minSdk = 28
         targetSdk = 30
-        versionCode = 4
+        versionCode = 5
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

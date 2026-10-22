@@ -1,0 +1,110 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: FireSpot private S3 backups with Cognito sign-in
+Resources:
+  Users:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UsernameAttributes: [email]
+      AutoVerifiedAttributes: [email]
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          RequireLowercase: true
+          RequireUppercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+  AppClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref Users
+      GenerateSecret: false
+      PreventUserExistenceErrors: ENABLED
+      ExplicitAuthFlows: [ALLOW_USER_PASSWORD_AUTH, ALLOW_REFRESH_TOKEN_AUTH]
+  Saves:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireOldBackups
+            Status: Enabled
+            ExpirationInDays: 30
+  SecureTransport:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref Saves
+      PolicyDocument:
+        Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: s3:*
+            Resource:
+              - !GetAtt Saves.Arn
+              - !Sub ${Saves.Arn}/*
+            Condition:
+              Bool:
+                aws:SecureTransport: false
+  Api:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 4
+        ThrottlingRateLimit: 2
+      Auth:
+        DefaultAuthorizer: User
+        Authorizers:
+          User:
+            IdentitySource: $request.header.Authorization
+            JwtConfiguration:
+              issuer: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/${Users}
+              audience: [!Ref AppClient]
+  Backup:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: handler.handler
+      Runtime: python3.12
+      Timeout: 15
+      MemorySize: 256
+      Environment:
+        Variables:
+          SAVE_BUCKET: !Ref Saves
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: s3:ListBucket
+              Resource: !GetAtt Saves.Arn
+            - Effect: Allow
+              Action: [s3:GetObject, s3:PutObject]
+              Resource: !Sub ${Saves.Arn}/users/*
+      Events:
+        List:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Path: /backups
+            Method: GET
+        Upload:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+            Path: /backups
+            Method: POST
+Outputs:
+  Endpoint:
+    Value: !Sub https://${Api}.execute-api.${AWS::Region}.${AWS::URLSuffix}/backups
+  CognitoClientId:
+    Value: !Ref AppClient
+  Region:
+    Value: !Ref AWS::Region

@@ -261,11 +261,20 @@ fun FireEmuNavGraph(
                 onOpenDiscover = {navController.navigate(Screen.Discover.route)},
                 onOpenInputDoctor = { navController.navigate(Screen.InputDoctor.route) },
                 onOpenStorage = { navController.navigate(Screen.Storage.route) },
+                onOpenCoach = { navController.navigate("retro-coach") },
+                onOpenCloud = { navController.navigate("cloud-saves") },
                 onNavigateMapping = {
                     navController.navigate(Screen.ControllerMapping.route)
                 },
                 onNavigateBack = { navController.popBackStack() }
             )
+        }
+
+        composable("cloud-saves") {
+            com.fireemu.ui.screens.cloud.CloudSavesScreen { navController.popBackStack() }
+        }
+        composable("retro-coach") {
+            com.fireemu.ui.screens.coach.RetroCoachScreen { navController.popBackStack() }
         }
 
         composable(Screen.InputDoctor.route) {

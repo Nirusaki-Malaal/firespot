@@ -20,7 +20,7 @@ import com.fireemu.ui.theme.*
 import kotlinx.coroutines.*
 
 @Composable
-fun SettingsScreen(viewModel:SettingsViewModel,onOpenDiscover:()->Unit,onNavigateMapping:()->Unit,onOpenInputDoctor:()->Unit,onOpenStorage:()->Unit,onNavigateBack:()->Unit) {
+fun SettingsScreen(viewModel:SettingsViewModel,onOpenDiscover:()->Unit,onNavigateMapping:()->Unit,onOpenInputDoctor:()->Unit,onOpenStorage:()->Unit,onOpenCoach:()->Unit,onOpenCloud:()->Unit,onNavigateBack:()->Unit) {
     val settings by viewModel.settings.collectAsState()
     val context=LocalContext.current
     val scope=rememberCoroutineScope()
@@ -78,6 +78,8 @@ fun SettingsScreen(viewModel:SettingsViewModel,onOpenDiscover:()->Unit,onNavigat
             Row(horizontalArrangement=Arrangement.spacedBy(12.dp)) {
                 TvButton("Controller & keyboard tester",onOpenInputDoctor)
                 TvButton("Storage & playtime",onOpenStorage)
+                TvButton("Retro Coach",onOpenCoach)
+                TvButton("Cloud saves",onOpenCloud)
             }
             Text("ABOUT THIS BUILD",color=FireSpotTextSubtitle,fontSize=10.sp,letterSpacing=2.sp)
             SettingsRow(if(BuildConfig.BUNDLED_CORE) "Starter build · Offline Game Boy" else "Standard · Separate console software",if(BuildConfig.BUNDLED_CORE) "Game Boy / Game Boy Color support is included. The standard APK keeps emulator cores separate." else "Game Boy support must be installed separately before playing.")

@@ -32,6 +32,16 @@ Open **Library** to play, or **Discover games** to browse original titles and th
 
 FireSpot currently integrates cores for Game Boy, Game Boy Color, NES, Game Boy Advance, SNES, Master System, Game Gear, SG-1000, and PlayStation. Compatibility depends on the core, title, firmware requirements, and device. See the [console support matrix](docs/CONSOLES.md) and [validation record](docs/VALIDATION.md) for the checks completed and remaining.
 
+## AWS integrations
+
+- **Cloud saves:** open Settings → Cloud saves, create or sign in to your account, then choose Back up now. On another installation, sign in and choose Restore latest. Newer local progress is preserved.
+- **Retro Coach:** open Settings → Retro Coach, enter a game title and question, or choose a control/save help shortcut. With a configured Bedrock Knowledge Base, answers include FireSpot reference excerpts.
+- **Spoken guidance:** select Listen to answer to hear the response through Amazon Polly. Stop audio ends playback; ambient music ducks while the coach speaks.
+
+Deploy the AWS stacks and set your connection values before using cloud features. Copy `.env.example` to `.env` and paste your configuration into that local file. Never commit credentials or paste secrets into chat. Build with `./scripts/build_v1.sh` to include your public connection defaults. Existing website and catalog URLs stay unchanged.
+
+[Complete AWS setup, API contracts, and security](docs/AWS_CLOUD_FEATURES.md) · [Bedrock deployment](docs/AWS_RETRO_COACH.md) · [Full application documentation](docs/DOCUMENTATION.md)
+
 ## Build
 
 JDK 17, Android SDK 34, and NDK 28.2.13676358:

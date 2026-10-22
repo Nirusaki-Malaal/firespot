@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: FireSpot Retro Coach using Amazon Bedrock Converse
+Parameters:
+  ModelId:
+    Type: String
+    Description: Converse-compatible regional foundation model ID
+  ModelArn:
+    Type: String
+    Description: Exact foundation model ARN permitted for invocation
+  KnowledgeBaseId:
+    Type: String
+    Default: ''
+    Description: Existing ingested Bedrock Knowledge Base ID for FireSpot documentation (optional)
+  CoachToken:
+    Type: String
+    NoEcho: true
+    MinLength: 32
+    Description: Random access token entered in FireSpot; never an AWS access key
+Resources:
+  CoachApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 2
+        ThrottlingRateLimit: 1
+  Coach:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: handler.handler
+      Runtime: python3.12
+      Timeout: 28
+      MemorySize: 256
+      ReservedConcurrentExecutions: 2
+      Environment:
+        Variables:
+          KNOWLEDGE_BASE_ID: !Ref KnowledgeBaseId
+          MODEL_ID: !Ref ModelId
+          COACH_TOKEN: !Ref CoachToken
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: bedrock:InvokeModel
+              Resource: !Ref ModelArn
+        - Statement:
+            - Effect: Allow
+              Action: polly:SynthesizeSpeech
+              Resource: '*'
+            - Effect: Allow
+              Action: bedrock:Retrieve
+              Resource: !Sub arn:${AWS::Partition}:bedrock:${AWS::Region}:${AWS::AccountId}:knowledge-base/${KnowledgeBaseId}
+      Events:
+        Speech:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CoachApi
+            Path: /speech
+            Method: POST
+        Ask:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref CoachApi
+            Path: /coach
+            Method: POST
+Outputs:
+  CoachEndpoint:
+    Value: !Sub https://${CoachApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/coach

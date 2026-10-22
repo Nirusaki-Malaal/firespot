@@ -15,6 +15,14 @@ object FireSpotAudio {
     private var clickId = 0
     private var soundPool: SoundPool? = null
     private var ambient: MediaPlayer? = null
+    private var speechDucking = false
+
+    @Synchronized
+    fun setSpeechDucking(active: Boolean) {
+        speechDucking = active
+        val volume = if (active) 0.02f else 0.10f
+        ambient?.setVolume(volume, volume)
+    }
 
     @Synchronized
     private fun ensureClick(context: Context) {
@@ -68,7 +76,7 @@ object FireSpotAudio {
                         .build()
                 )
                 isLooping = true
-                setVolume(0.10f, 0.10f)
+                setVolume(if (speechDucking) 0.02f else 0.10f, if (speechDucking) 0.02f else 0.10f)
             }
         }
         ambient?.let { if (!it.isPlaying) it.start() }

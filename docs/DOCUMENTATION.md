@@ -173,3 +173,23 @@ Navigation-owned ViewModels cancel work when their entries are cleared. Rail nav
 Software video reuses a horizontal source-pixel map, converts each unique scaled source row once and copies repeated rows. Letterbox clearing touches borders rather than clearing the full output before drawing it again. This reduces redundant pixel conversion for handheld-size games; it is not a target-device FPS guarantee. Frame timing and memory measurements must identify device and build type.
 
 Home and the rail's collection views share a lifecycle-owned library ViewModel, avoiding four separate library query/sort pipelines. The external website uses a separate `:browser` process so its Chromium working set is independent of the launcher/game heap. Android may retain that process in its cache after exit and reclaims it under pressure; destroying a WebView does not guarantee immediate process memory reclamation.
+
+## AWS cloud features
+
+FireSpot's Settings screen includes Cloud saves and Retro Coach. Local games and progress remain available independently of these services. The complete deployment and integration reference is [AWS cloud features](AWS_CLOUD_FEATURES.md), with the coach stack covered in [Retro Coach deployment](AWS_RETRO_COACH.md).
+
+### Configure your installation
+
+Copy `.env.example` at the repository root to `.env`, then paste your deployment's public endpoint, Cognito region, and client ID into that local file. Run `./scripts/build_v1.sh` with Java 17 to build version 1.0.0 with those defaults. You can also edit Connection settings inside each cloud screen. AWS credentials belong in your local AWS CLI profile or Lambda execution role, never in the APK. The existing website and console catalog endpoints are independent and are not changed by cloud configuration.
+
+### Back up and restore progress
+
+Open Settings → Cloud saves. Create an account, verify the email code, and sign in. Back up now uploads the current save slots and cartridge battery progress to your private account. On another installation, sign in and choose Restore latest, then confirm. Matching game filenames and compatible cores are required. Close running games first. Newer local saves are preserved. Games, BIOS, covers, and account data are excluded from backups. Cloud snapshots are retained for 30 days.
+
+### Ask and listen
+
+Open Settings → Retro Coach. Configure the coach connection and enter the session access token. Choose a help shortcut or enter a title and question. When the backend has a Knowledge Base configured, the answer includes retrieved reference excerpts. Choose Listen to answer for Polly playback, or Stop audio to end it. Playback stops when you leave or background the screen. Ambient music lowers during speech and returns afterward.
+
+### Architecture and maintenance
+
+The coach uses API Gateway → Lambda → Bedrock Retrieve/Converse and Polly SynthesizeSpeech. Cloud saves use Cognito authentication → JWT-authorized API Gateway → Lambda → private S3 objects accessed through short-lived signed requests. [The integration guide](AWS_CLOUD_FEATURES.md) documents request contracts, IAM boundaries, archive limits, deployment outputs, errors, and maintenance commands.
