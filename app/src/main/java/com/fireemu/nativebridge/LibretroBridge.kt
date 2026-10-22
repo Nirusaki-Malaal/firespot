@@ -3,13 +3,7 @@ package com.fireemu.nativebridge
 import android.view.Surface
 
 object LibretroBridge {
-    init {
-        try {
-            System.loadLibrary("retro_bridge")
-        } catch (e: UnsatisfiedLinkError) {
-            // Handled when dynamically located or in tests
-        }
-    }
+    init { System.loadLibrary("retro_bridge") }
 
     fun interface AudioCallback {
         fun onAudioSamples(samples: ShortArray, numSamples: Int)
@@ -26,12 +20,15 @@ object LibretroBridge {
         audioCallback?.onAudioSamples(samples, numSamples)
     }
 
-    external fun nativeInitCore(coreLibraryPath: String): Boolean
-    external fun nativeSetSurface(surface: Surface, targetWidth: Int, targetHeight: Int): Boolean
-    external fun nativeLoadGame(romPath: String, biosPath: String): Boolean
-    external fun nativeRunFrame(inputBitmask: Int)
-    external fun nativeSaveState(stateFilePath: String): Boolean
-    external fun nativeLoadState(stateFilePath: String): Boolean
-    external fun nativeReset()
-    external fun nativeDestroy()
+    @Synchronized external fun nativeInitCore(coreLibraryPath: String): Boolean
+    @Synchronized external fun nativeSetSurface(surface: Surface, targetWidth: Int, targetHeight: Int): Boolean
+    @Synchronized external fun nativeLoadGame(romPath: String, biosPath: String): Boolean
+    @Synchronized external fun nativeRunFrame(inputBitmask: Int)
+    @Synchronized external fun nativeSaveState(stateFilePath: String): Boolean
+    @Synchronized external fun nativeLoadState(stateFilePath: String): Boolean
+    @Synchronized external fun nativeGetTiming(): DoubleArray?
+    @Synchronized external fun nativeSetScaling(mode: Int)
+    @Synchronized external fun nativeBatteryRam(path: String, saving: Boolean): Boolean
+    @Synchronized external fun nativeReset()
+    @Synchronized external fun nativeDestroy()
 }

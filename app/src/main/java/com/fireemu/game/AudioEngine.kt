@@ -7,9 +7,8 @@ import com.fireemu.nativebridge.LibretroBridge
 
 class AudioEngine(private val bufferSizeSamples: Int = 1600) {
     private var audioTrack: AudioTrack? = null
-    private val sampleRate = 48000
-
-    fun init() {
+    fun init(sampleRate: Int) {
+        release()
         val minBuf = AudioTrack.getMinBufferSize(
             sampleRate,
             AudioFormat.CHANNEL_OUT_STEREO,

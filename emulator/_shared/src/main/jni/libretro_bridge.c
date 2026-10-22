@@ -15,119 +15,22 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <unistd.h>
+#include "libretro.h"
 
 #define LOG_TAG "FireEmuBridge"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 #define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
-/* Libretro Constants */
-#define RETRO_DEVICE_ID_JOYPAD_B        0
-#define RETRO_DEVICE_ID_JOYPAD_Y        1
-#define RETRO_DEVICE_ID_JOYPAD_SELECT   2
-#define RETRO_DEVICE_ID_JOYPAD_START    3
-#define RETRO_DEVICE_ID_JOYPAD_UP       4
-#define RETRO_DEVICE_ID_JOYPAD_DOWN     5
-#define RETRO_DEVICE_ID_JOYPAD_LEFT     6
-#define RETRO_DEVICE_ID_JOYPAD_RIGHT    7
-#define RETRO_DEVICE_ID_JOYPAD_A        8
-#define RETRO_DEVICE_ID_JOYPAD_X        9
-#define RETRO_DEVICE_ID_JOYPAD_L       10
-#define RETRO_DEVICE_ID_JOYPAD_R       11
-#define RETRO_DEVICE_ID_JOYPAD_L2      12
-#define RETRO_DEVICE_ID_JOYPAD_R2      13
-#define RETRO_DEVICE_ID_JOYPAD_L3      14
-#define RETRO_DEVICE_ID_JOYPAD_R3      15
-
-#define RETRO_ENVIRONMENT_SET_ROTATION            1
-#define RETRO_ENVIRONMENT_GET_OVERSCAN            2
-#define RETRO_ENVIRONMENT_GET_CAN_DUPE            3
-#define RETRO_ENVIRONMENT_SET_MESSAGE             6
-#define RETRO_ENVIRONMENT_SHUTDOWN                7
-#define RETRO_ENVIRONMENT_SET_PERFORMANCE_LEVEL   8
-#define RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY    9
-#define RETRO_ENVIRONMENT_SET_PIXEL_FORMAT       10
-#define RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS  11
-#define RETRO_ENVIRONMENT_SET_KEYBOARD_CALLBACK  12
-#define RETRO_ENVIRONMENT_SET_DISK_CONTROL_INTERFACE 13
-#define RETRO_ENVIRONMENT_SET_HW_RENDER          14
-#define RETRO_ENVIRONMENT_GET_VARIABLE           15
-#define RETRO_ENVIRONMENT_SET_VARIABLES          16
-#define RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE    17
-#define RETRO_ENVIRONMENT_SET_SUPPORT_NO_GAME    18
-#define RETRO_ENVIRONMENT_GET_LIBRETRO_PATH      19
-#define RETRO_ENVIRONMENT_GET_LOG_INTERFACE      27
-#define RETRO_ENVIRONMENT_GET_CORE_ASSETS_DIRECTORY 30
-#define RETRO_ENVIRONMENT_GET_SAVE_DIRECTORY     31
-
-#define RETRO_PIXEL_FORMAT_0RGB1555 0
-#define RETRO_PIXEL_FORMAT_XRGB8888 1
-#define RETRO_PIXEL_FORMAT_RGB565   2
-
-enum retro_log_level {
-    RETRO_LOG_DEBUG = 0,
-    RETRO_LOG_INFO,
-    RETRO_LOG_WARN,
-    RETRO_LOG_ERROR
-};
-
-struct retro_log_callback {
-    void (*log)(enum retro_log_level level, const char *fmt, ...);
-};
-
-struct retro_variable {
-    const char *key;
-    const char *value;
-};
-
-struct retro_game_info {
-    const char *path;
-    const void *data;
-    size_t      size;
-    const char *meta;
-};
-
-struct retro_game_geometry {
-    unsigned base_width;
-    unsigned base_height;
-    unsigned max_width;
-    unsigned max_height;
-    float    aspect_ratio;
-};
-
-struct retro_system_timing {
-    double fps;
-    double sample_rate;
-};
-
-struct retro_system_av_info {
-    struct retro_game_geometry geometry;
-    struct retro_system_timing timing;
-};
-
-typedef void (*retro_init_t)(void);
-typedef void (*retro_deinit_t)(void);
-typedef unsigned (*retro_api_version_t)(void);
-typedef void (*retro_set_environment_t)(bool (*)(unsigned, void*));
-typedef void (*retro_set_video_refresh_t)(void (*)(const void*, unsigned, unsigned, size_t));
-typedef void (*retro_set_audio_sample_t)(void (*)(int16_t, int16_t));
-typedef void (*retro_set_audio_sample_batch_t)(size_t (*)(const int16_t*, size_t));
-typedef void (*retro_set_input_poll_t)(void (*)(void));
-typedef void (*retro_set_input_state_t)(int16_t (*)(unsigned, unsigned, unsigned, unsigned));
-typedef bool (*retro_load_game_t)(const struct retro_game_info*);
-typedef void (*retro_unload_game_t)(void);
-typedef void (*retro_run_t)(void);
-typedef void (*retro_reset_t)(void);
-typedef size_t (*retro_serialize_size_t)(void);
-typedef bool (*retro_serialize_t)(void*, size_t);
-typedef bool (*retro_unserialize_t)(const void*, size_t);
-typedef void (*retro_get_system_av_info_t)(struct retro_system_av_info*);
-
 /* Global State */
 static void *g_core_handle = NULL;
 static ANativeWindow *g_native_window = NULL;
 static int g_current_input_bitmask = 0;
-static int g_pixel_format = RETRO_PIXEL_FORMAT_RGB565;
+static int g_pixel_format = RETRO_PIXEL_FORMAT_0RGB1555;
+static void *g_rom_data = NULL;
+static bool g_game_loaded = false;
+static bool g_initialized = false;
 static char g_system_dir[512] = "/sdcard/ROMs/bios";
 static char g_save_dir[512] = "/sdcard/ROMs";
 
@@ -142,22 +45,25 @@ static size_t g_audio_accum_count = 0;
 static jshortArray g_reusable_audio_array = NULL;
 
 /* Libretro Core Function Pointers */
-static retro_init_t core_init = NULL;
-static retro_deinit_t core_deinit = NULL;
-static retro_set_environment_t core_set_environment = NULL;
-static retro_set_video_refresh_t core_set_video_refresh = NULL;
-static retro_set_audio_sample_t core_set_audio_sample = NULL;
-static retro_set_audio_sample_batch_t core_set_audio_batch = NULL;
-static retro_set_input_poll_t core_set_input_poll = NULL;
-static retro_set_input_state_t core_set_input_state = NULL;
-static retro_load_game_t core_load_game = NULL;
-static retro_unload_game_t core_unload_game = NULL;
-static retro_run_t core_run = NULL;
-static retro_reset_t core_reset = NULL;
-static retro_serialize_size_t core_serialize_size = NULL;
-static retro_serialize_t core_serialize = NULL;
-static retro_unserialize_t core_unserialize = NULL;
-static retro_get_system_av_info_t core_get_av_info = NULL;
+static void (*core_init)(void) = NULL;
+static void (*core_deinit)(void) = NULL;
+static void (*core_set_environment)(retro_environment_t) = NULL;
+static void (*core_set_video_refresh)(retro_video_refresh_t) = NULL;
+static void (*core_set_audio_sample)(retro_audio_sample_t) = NULL;
+static void (*core_set_audio_batch)(retro_audio_sample_batch_t) = NULL;
+static void (*core_set_input_poll)(retro_input_poll_t) = NULL;
+static void (*core_set_input_state)(retro_input_state_t) = NULL;
+static bool (*core_load_game)(const struct retro_game_info*) = NULL;
+static void (*core_unload_game)(void) = NULL;
+static void (*core_run)(void) = NULL;
+static void (*core_reset)(void) = NULL;
+static size_t (*core_serialize_size)(void) = NULL;
+static bool (*core_serialize)(void*, size_t) = NULL;
+static bool (*core_unserialize)(const void*, size_t) = NULL;
+static void (*core_get_av_info)(struct retro_system_av_info*) = NULL;
+static void *(*core_memory_data)(unsigned) = NULL;
+static size_t (*core_memory_size)(unsigned) = NULL;
+static void (*core_get_info)(struct retro_system_info*) = NULL;
 
 static void core_log_cb(enum retro_log_level level, const char *fmt, ...) {
     char buf[1024];
@@ -252,101 +158,37 @@ static bool core_environ_cb(unsigned cmd, void *data) {
     }
 }
 
+static int g_scaling_mode = 0;
 static void core_video_refresh_cb(const void *data, unsigned width, unsigned height, size_t pitch) {
     if (!g_native_window || !data || width == 0 || height == 0) return;
-
     ANativeWindow_Buffer buffer;
-    if (ANativeWindow_lock(g_native_window, &buffer, NULL) < 0) {
-        return;
+    if (ANativeWindow_lock(g_native_window, &buffer, NULL) < 0) return;
+    if (!buffer.bits || buffer.width <= 0 || buffer.height <= 0) { ANativeWindow_unlockAndPost(g_native_window); return; }
+    uint32_t *dst = buffer.bits;
+    memset(dst, 0, (size_t)buffer.stride * buffer.height * 4);
+    int rw = buffer.width, rh = buffer.height;
+    if (g_scaling_mode != 2) {
+        double sx = (double)buffer.width / width, sy = (double)buffer.height / height;
+        double scale = sx < sy ? sx : sy;
+        if (g_scaling_mode == 1 && scale >= 1) scale = (int)scale;
+        rw = (int)(width * scale); rh = (int)(height * scale);
     }
-
-    uint32_t *dst = (uint32_t*)buffer.bits;
-    int dst_w = buffer.width;
-    int dst_h = buffer.height;
-    int stride = buffer.stride;
-
-    if (!dst || dst_w <= 0 || dst_h <= 0) {
-        ANativeWindow_unlockAndPost(g_native_window);
-        return;
-    }
-
-    /* Compute integer/uniform aspect ratio scale */
-    int scale_x = dst_w / width;
-    int scale_y = dst_h / height;
-    int scale = (scale_x < scale_y ? scale_x : scale_y);
-    if (scale < 1) scale = 1;
-
-    int render_w = width * scale;
-    int render_h = height * scale;
-    int offset_x = (dst_w - render_w) / 2;
-    int offset_y = (dst_h - render_h) / 2;
-    if (offset_x < 0) offset_x = 0;
-    if (offset_y < 0) offset_y = 0;
-
-    if (g_pixel_format == RETRO_PIXEL_FORMAT_XRGB8888) {
-        for (unsigned y = 0; y < height; y++) {
-            const uint32_t *line_src = (const uint32_t*)((const uint8_t*)data + y * pitch);
-            for (int sy = 0; sy < scale; sy++) {
-                int out_y = offset_y + y * scale + sy;
-                if (out_y >= dst_h) break;
-                uint32_t *line_dst = dst + out_y * stride;
-                for (unsigned x = 0; x < width; x++) {
-                    uint32_t pix = line_src[x] | 0xFF000000;
-                    for (int sx = 0; sx < scale; sx++) {
-                        int out_x = offset_x + x * scale + sx;
-                        if (out_x < dst_w) {
-                            line_dst[out_x] = pix;
-                        }
-                    }
-                }
+    int ox = (buffer.width-rw)/2, oy = (buffer.height-rh)/2;
+    for (int y=0; y<rh; y++) {
+        const uint8_t *row = (const uint8_t*)data + ((size_t)y * height / rh) * pitch;
+        for (int x=0; x<rw; x++) {
+            unsigned px = (unsigned)((size_t)x * width / rw);
+            uint32_t r,g,b;
+            if (g_pixel_format == RETRO_PIXEL_FORMAT_XRGB8888) {
+                uint32_t v = ((const uint32_t*)row)[px]; r=(v>>16)&255;g=(v>>8)&255;b=v&255;
+            } else {
+                uint16_t v=((const uint16_t*)row)[px];
+                if (g_pixel_format == RETRO_PIXEL_FORMAT_RGB565) {r=((v>>11)&31)*255/31;g=((v>>5)&63)*255/63;b=(v&31)*255/31;}
+                else {r=((v>>10)&31)*255/31;g=((v>>5)&31)*255/31;b=(v&31)*255/31;}
             }
-        }
-    } else if (g_pixel_format == RETRO_PIXEL_FORMAT_0RGB1555) {
-        for (unsigned y = 0; y < height; y++) {
-            const uint16_t *line_src = (const uint16_t*)((const uint8_t*)data + y * pitch);
-            for (int sy = 0; sy < scale; sy++) {
-                int out_y = offset_y + y * scale + sy;
-                if (out_y >= dst_h) break;
-                uint32_t *line_dst = dst + out_y * stride;
-                for (unsigned x = 0; x < width; x++) {
-                    uint16_t bgr1555 = line_src[x];
-                    uint32_t r = ((bgr1555 >> 10) & 0x1F) << 3;
-                    uint32_t g = ((bgr1555 >> 5) & 0x1F) << 3;
-                    uint32_t b = (bgr1555 & 0x1F) << 3;
-                    uint32_t pixel = (0xFF << 24) | (r << 16) | (g << 8) | b;
-                    for (int sx = 0; sx < scale; sx++) {
-                        int out_x = offset_x + x * scale + sx;
-                        if (out_x < dst_w) {
-                            line_dst[out_x] = pixel;
-                        }
-                    }
-                }
-            }
-        }
-    } else { // RETRO_PIXEL_FORMAT_RGB565
-        for (unsigned y = 0; y < height; y++) {
-            const uint16_t *line_src = (const uint16_t*)((const uint8_t*)data + y * pitch);
-            for (int sy = 0; sy < scale; sy++) {
-                int out_y = offset_y + y * scale + sy;
-                if (out_y >= dst_h) break;
-                uint32_t *line_dst = dst + out_y * stride;
-                for (unsigned x = 0; x < width; x++) {
-                    uint16_t rgb565 = line_src[x];
-                    uint32_t r = ((rgb565 >> 11) & 0x1F) << 3;
-                    uint32_t g = ((rgb565 >> 5) & 0x3F) << 2;
-                    uint32_t b = (rgb565 & 0x1F) << 3;
-                    uint32_t pixel = (0xFF << 24) | (r << 16) | (g << 8) | b;
-                    for (int sx = 0; sx < scale; sx++) {
-                        int out_x = offset_x + x * scale + sx;
-                        if (out_x < dst_w) {
-                            line_dst[out_x] = pixel;
-                        }
-                    }
-                }
-            }
+            dst[(oy+y)*buffer.stride+ox+x] = 0xFF000000 | (b<<16) | (g<<8) | r;
         }
     }
-
     ANativeWindow_unlockAndPost(g_native_window);
 }
 
@@ -398,7 +240,7 @@ static size_t core_audio_batch_cb(const int16_t *data, size_t frames) {
 static void core_input_poll_cb(void) {}
 
 static int16_t core_input_state_cb(unsigned port, unsigned device, unsigned index, unsigned id) {
-    if (port == 0 && id < 16) {
+    if (port == 0 && device == RETRO_DEVICE_JOYPAD && id < 16) {
         return (g_current_input_bitmask & (1 << id)) ? 1 : 0;
     }
     return 0;
@@ -410,7 +252,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
     JNIEnv *env = NULL;
     if ((*vm)->GetEnv(vm, (void**)&env, JNI_VERSION_1_6) != JNI_OK) return -1;
 
-    jclass cls = (*env)->FindClass(env, "com/fireemu/launcher/jni/LibretroBridge");
+    jclass cls = (*env)->FindClass(env, "com/fireemu/nativebridge/LibretroBridge");
     if (!cls) {
         LOGE("Could not find LibretroBridge class");
         return -1;
@@ -420,11 +262,15 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
     return JNI_VERSION_1_6;
 }
 
-JNIEXPORT jboolean JNICALL Java_com_fireemu_launcher_jni_LibretroBridge_nativeInitCore(
+JNIEXPORT jboolean JNICALL Java_com_fireemu_nativebridge_LibretroBridge_nativeInitCore(
         JNIEnv *env, jclass cls, jstring coreLibPath) {
     const char *path = (*env)->GetStringUTFChars(env, coreLibPath, NULL);
     LOGI("Loading Libretro core: %s", path);
-    g_core_handle = dlopen(path, RTLD_LAZY | RTLD_LOCAL);
+    if (g_core_handle) {
+        (*env)->ReleaseStringUTFChars(env, coreLibPath, path);
+        return JNI_FALSE;
+    }
+    g_core_handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
     (*env)->ReleaseStringUTFChars(env, coreLibPath, path);
 
     if (!g_core_handle) {
@@ -432,36 +278,59 @@ JNIEXPORT jboolean JNICALL Java_com_fireemu_launcher_jni_LibretroBridge_nativeIn
         return JNI_FALSE;
     }
 
-    core_init = (retro_init_t)dlsym(g_core_handle, "retro_init");
-    core_deinit = (retro_deinit_t)dlsym(g_core_handle, "retro_deinit");
-    core_set_environment = (retro_set_environment_t)dlsym(g_core_handle, "retro_set_environment");
-    core_set_video_refresh = (retro_set_video_refresh_t)dlsym(g_core_handle, "retro_set_video_refresh");
-    core_set_audio_sample = (retro_set_audio_sample_t)dlsym(g_core_handle, "retro_set_audio_sample");
-    core_set_audio_batch = (retro_set_audio_sample_batch_t)dlsym(g_core_handle, "retro_set_audio_sample_batch");
-    core_set_input_poll = (retro_set_input_poll_t)dlsym(g_core_handle, "retro_set_input_poll");
-    core_set_input_state = (retro_set_input_state_t)dlsym(g_core_handle, "retro_set_input_state");
-    core_load_game = (retro_load_game_t)dlsym(g_core_handle, "retro_load_game");
-    core_unload_game = (retro_unload_game_t)dlsym(g_core_handle, "retro_unload_game");
-    core_run = (retro_run_t)dlsym(g_core_handle, "retro_run");
-    core_reset = (retro_reset_t)dlsym(g_core_handle, "retro_reset");
-    core_serialize_size = (retro_serialize_size_t)dlsym(g_core_handle, "retro_serialize_size");
-    core_serialize = (retro_serialize_t)dlsym(g_core_handle, "retro_serialize");
-    core_unserialize = (retro_unserialize_t)dlsym(g_core_handle, "retro_unserialize");
-    core_get_av_info = (retro_get_system_av_info_t)dlsym(g_core_handle, "retro_get_system_av_info");
+    unsigned (*api_version)(void) = dlsym(g_core_handle, "retro_api_version");
+    if (!api_version || api_version() != RETRO_API_VERSION) {
+        LOGE("Unsupported Libretro API version");
+        dlclose(g_core_handle);
+        g_core_handle = NULL;
+        return JNI_FALSE;
+    }
+    g_pixel_format = RETRO_PIXEL_FORMAT_0RGB1555;
 
-    if (core_set_environment) core_set_environment(core_environ_cb);
+    core_memory_data = dlsym(g_core_handle, "retro_get_memory_data");
+    core_memory_size = dlsym(g_core_handle, "retro_get_memory_size");
+    core_get_info = dlsym(g_core_handle, "retro_get_system_info");
+    core_init = dlsym(g_core_handle, "retro_init");
+    core_deinit = dlsym(g_core_handle, "retro_deinit");
+    core_set_environment = dlsym(g_core_handle, "retro_set_environment");
+    core_set_video_refresh = dlsym(g_core_handle, "retro_set_video_refresh");
+    core_set_audio_sample = dlsym(g_core_handle, "retro_set_audio_sample");
+    core_set_audio_batch = dlsym(g_core_handle, "retro_set_audio_sample_batch");
+    core_set_input_poll = dlsym(g_core_handle, "retro_set_input_poll");
+    core_set_input_state = dlsym(g_core_handle, "retro_set_input_state");
+    core_load_game = dlsym(g_core_handle, "retro_load_game");
+    core_unload_game = dlsym(g_core_handle, "retro_unload_game");
+    core_run = dlsym(g_core_handle, "retro_run");
+    core_reset = dlsym(g_core_handle, "retro_reset");
+    core_serialize_size = dlsym(g_core_handle, "retro_serialize_size");
+    core_serialize = dlsym(g_core_handle, "retro_serialize");
+    core_unserialize = dlsym(g_core_handle, "retro_unserialize");
+    core_get_av_info = dlsym(g_core_handle, "retro_get_system_av_info");
+
+    if (!core_get_info || !core_get_av_info || !core_init || !core_deinit ||
+        !core_set_environment || !core_set_video_refresh || !core_set_audio_sample ||
+        !core_set_audio_batch || !core_set_input_poll || !core_set_input_state ||
+        !core_load_game || !core_unload_game || !core_run || !core_reset ||
+        !core_serialize_size || !core_serialize || !core_unserialize) {
+        LOGE("Core is missing required Libretro entry points");
+        dlclose(g_core_handle);
+        g_core_handle = NULL;
+        return JNI_FALSE;
+    }
+    core_set_environment(core_environ_cb);
     if (core_set_video_refresh) core_set_video_refresh(core_video_refresh_cb);
     if (core_set_audio_sample) core_set_audio_sample(core_audio_sample_cb);
     if (core_set_audio_batch) core_set_audio_batch(core_audio_batch_cb);
     if (core_set_input_poll) core_set_input_poll(core_input_poll_cb);
     if (core_set_input_state) core_set_input_state(core_input_state_cb);
-    if (core_init) core_init();
+    core_init();
+    g_initialized = true;
 
     LOGI("Libretro core initialized successfully.");
     return JNI_TRUE;
 }
 
-JNIEXPORT jboolean JNICALL Java_com_fireemu_launcher_jni_LibretroBridge_nativeSetSurface(
+JNIEXPORT jboolean JNICALL Java_com_fireemu_nativebridge_LibretroBridge_nativeSetSurface(
         JNIEnv *env, jclass cls, jobject surface, jint width, jint height) {
     if (g_native_window) {
         ANativeWindow_release(g_native_window);
@@ -469,15 +338,19 @@ JNIEXPORT jboolean JNICALL Java_com_fireemu_launcher_jni_LibretroBridge_nativeSe
     }
     if (surface) {
         g_native_window = ANativeWindow_fromSurface(env, surface);
-        ANativeWindow_setBuffersGeometry(g_native_window, width, height, WINDOW_FORMAT_RGBA_8888);
+        if (!g_native_window || ANativeWindow_setBuffersGeometry(g_native_window, width, height, WINDOW_FORMAT_RGBA_8888) != 0) {
+            if (g_native_window) ANativeWindow_release(g_native_window);
+            g_native_window = NULL;
+            return JNI_FALSE;
+        }
         return JNI_TRUE;
     }
     return JNI_FALSE;
 }
 
-JNIEXPORT jboolean JNICALL Java_com_fireemu_launcher_jni_LibretroBridge_nativeLoadGame(
+JNIEXPORT jboolean JNICALL Java_com_fireemu_nativebridge_LibretroBridge_nativeLoadGame(
         JNIEnv *env, jclass cls, jstring romPath, jstring biosPath) {
-    if (!core_load_game) return JNI_FALSE;
+    if (!g_initialized || g_game_loaded) return JNI_FALSE;
 
     if (biosPath) {
         const char *c_bios = (*env)->GetStringUTFChars(env, biosPath, NULL);
@@ -502,25 +375,49 @@ JNIEXPORT jboolean JNICALL Java_com_fireemu_launcher_jni_LibretroBridge_nativeLo
         .size = 0,
         .meta = NULL
     };
+    struct retro_system_info system_info = {0};
+    core_get_info(&system_info);
+    if (!system_info.need_fullpath) {
+        FILE *rom = fopen(c_path, "rb");
+        long size = -1;
+        if (rom && fseek(rom, 0, SEEK_END) == 0) size = ftell(rom);
+        if (!rom || size <= 0 || size > 64 * 1024 * 1024 || fseek(rom, 0, SEEK_SET) != 0) {
+            if (rom) fclose(rom);
+            (*env)->ReleaseStringUTFChars(env, romPath, c_path);
+            return JNI_FALSE;
+        }
+        g_rom_data = malloc((size_t)size);
+        bool read_ok = g_rom_data && fread(g_rom_data, 1, size, rom) == (size_t)size;
+        fclose(rom);
+        if (!read_ok) {
+            free(g_rom_data); g_rom_data = NULL;
+            (*env)->ReleaseStringUTFChars(env, romPath, c_path);
+            return JNI_FALSE;
+        }
+        info.data = g_rom_data;
+        info.size = size;
+    }
     bool ok = core_load_game(&info);
+    g_game_loaded = ok;
+    if (!ok) { free(g_rom_data); g_rom_data = NULL; }
     if (c_path) {
         (*env)->ReleaseStringUTFChars(env, romPath, c_path);
     }
     return ok ? JNI_TRUE : JNI_FALSE;
 }
 
-JNIEXPORT void JNICALL Java_com_fireemu_launcher_jni_LibretroBridge_nativeRunFrame(
+JNIEXPORT void JNICALL Java_com_fireemu_nativebridge_LibretroBridge_nativeRunFrame(
         JNIEnv *env, jclass cls, jint inputBitmask) {
     g_current_input_bitmask = inputBitmask;
-    if (core_run) {
+    if (g_game_loaded) {
         core_run();
     }
     flush_audio();
 }
 
-JNIEXPORT jboolean JNICALL Java_com_fireemu_launcher_jni_LibretroBridge_nativeSaveState(
+JNIEXPORT jboolean JNICALL Java_com_fireemu_nativebridge_LibretroBridge_nativeSaveState(
         JNIEnv *env, jclass cls, jstring stateFilePath) {
-    if (!core_serialize || !core_serialize_size) return JNI_FALSE;
+    if (!g_game_loaded || !core_serialize || !core_serialize_size) return JNI_FALSE;
     size_t sz = core_serialize_size();
     if (sz == 0) return JNI_FALSE;
 
@@ -530,10 +427,15 @@ JNIEXPORT jboolean JNICALL Java_com_fireemu_launcher_jni_LibretroBridge_nativeSa
     bool ok = core_serialize(data, sz);
     if (ok) {
         const char *c_file = (*env)->GetStringUTFChars(env, stateFilePath, NULL);
-        FILE *f = fopen(c_file, "wb");
+        char temp[1024];
+        snprintf(temp, sizeof(temp), "%s.tmp", c_file);
+        FILE *f = fopen(temp, "wb");
         if (f) {
-            fwrite(data, 1, sz, f);
-            fclose(f);
+            ok = fwrite(data, 1, sz, f) == sz;
+            if (fflush(f) != 0 || fsync(fileno(f)) != 0) ok = false;
+            if (fclose(f) != 0) ok = false;
+            if (ok) ok = rename(temp, c_file) == 0;
+            if (!ok) remove(temp);
         } else {
             ok = false;
         }
@@ -543,9 +445,9 @@ JNIEXPORT jboolean JNICALL Java_com_fireemu_launcher_jni_LibretroBridge_nativeSa
     return ok ? JNI_TRUE : JNI_FALSE;
 }
 
-JNIEXPORT jboolean JNICALL Java_com_fireemu_launcher_jni_LibretroBridge_nativeLoadState(
+JNIEXPORT jboolean JNICALL Java_com_fireemu_nativebridge_LibretroBridge_nativeLoadState(
         JNIEnv *env, jclass cls, jstring stateFilePath) {
-    if (!core_unserialize || !core_serialize_size) return JNI_FALSE;
+    if (!g_game_loaded || !core_unserialize || !core_serialize_size) return JNI_FALSE;
     size_t sz = core_serialize_size();
     if (sz == 0) return JNI_FALSE;
 
@@ -557,6 +459,7 @@ JNIEXPORT jboolean JNICALL Java_com_fireemu_launcher_jni_LibretroBridge_nativeLo
     }
 
     void *data = malloc(sz);
+    if (!data) { fclose(f); return JNI_FALSE; }
     size_t read_bytes = fread(data, 1, sz, f);
     fclose(f);
     (*env)->ReleaseStringUTFChars(env, stateFilePath, c_file);
@@ -569,15 +472,52 @@ JNIEXPORT jboolean JNICALL Java_com_fireemu_launcher_jni_LibretroBridge_nativeLo
     return ok ? JNI_TRUE : JNI_FALSE;
 }
 
-JNIEXPORT void JNICALL Java_com_fireemu_launcher_jni_LibretroBridge_nativeReset(
-        JNIEnv *env, jclass cls) {
-    if (core_reset) core_reset();
+/* Cartridge battery RAM is independent of emulator snapshots. */
+JNIEXPORT jboolean JNICALL Java_com_fireemu_nativebridge_LibretroBridge_nativeBatteryRam(
+        JNIEnv *env, jclass cls, jstring path, jboolean saving) {
+    if (!g_game_loaded || !core_memory_data || !core_memory_size) return JNI_FALSE;
+    size_t size = core_memory_size(RETRO_MEMORY_SAVE_RAM);
+    void *data = core_memory_data(RETRO_MEMORY_SAVE_RAM);
+    if (!data || !size || size > 8 * 1024 * 1024) return JNI_FALSE;
+    const char *name = (*env)->GetStringUTFChars(env, path, NULL);
+    if (!name) return JNI_FALSE;
+    bool ok = false;
+    if (saving) {
+        char temp[1024];
+        if (snprintf(temp, sizeof(temp), "%s.tmp", name) < (int)sizeof(temp)) {
+            FILE *f = fopen(temp, "wb");
+            if (f) {
+                ok = fwrite(data, 1, size, f) == size;
+                if (fflush(f) || fsync(fileno(f))) ok = false;
+                if (fclose(f)) ok = false;
+                if (ok) ok = rename(temp, name) == 0;
+                if (!ok) remove(temp);
+            }
+        }
+    } else {
+        FILE *f = fopen(name, "rb");
+        if (f) {
+            if (fseek(f, 0, SEEK_END) == 0 && ftell(f) == (long)size && fseek(f, 0, SEEK_SET) == 0)
+                ok = fread(data, 1, size, f) == size;
+            fclose(f);
+        }
+    }
+    (*env)->ReleaseStringUTFChars(env, path, name);
+    return ok ? JNI_TRUE : JNI_FALSE;
 }
 
-JNIEXPORT void JNICALL Java_com_fireemu_launcher_jni_LibretroBridge_nativeDestroy(
+JNIEXPORT void JNICALL Java_com_fireemu_nativebridge_LibretroBridge_nativeReset(
         JNIEnv *env, jclass cls) {
-    if (core_unload_game) core_unload_game();
-    if (core_deinit) core_deinit();
+    if (g_game_loaded) core_reset();
+}
+
+JNIEXPORT void JNICALL Java_com_fireemu_nativebridge_LibretroBridge_nativeDestroy(
+        JNIEnv *env, jclass cls) {
+    if (g_game_loaded) core_unload_game();
+    if (g_initialized) core_deinit();
+    g_game_loaded = false;
+    g_initialized = false;
+    free(g_rom_data); g_rom_data = NULL;
     if (g_native_window) {
         ANativeWindow_release(g_native_window);
         g_native_window = NULL;
@@ -592,3 +532,16 @@ JNIEXPORT void JNICALL Java_com_fireemu_launcher_jni_LibretroBridge_nativeDestro
     }
     g_audio_accum_count = 0;
 }
+
+JNIEXPORT jdoubleArray JNICALL Java_com_fireemu_nativebridge_LibretroBridge_nativeGetTiming(
+        JNIEnv *env, jobject self) {
+    if (!g_game_loaded) return NULL;
+    struct retro_system_av_info info = {0};
+    core_get_av_info(&info);
+    jdouble values[2] = {info.timing.fps, info.timing.sample_rate};
+    jdoubleArray result = (*env)->NewDoubleArray(env, 2);
+    if (result) (*env)->SetDoubleArrayRegion(env, result, 0, 2, values);
+    return result;
+}
+
+JNIEXPORT void JNICALL Java_com_fireemu_nativebridge_LibretroBridge_nativeSetScaling(JNIEnv *env, jobject self, jint mode) { if (mode>=0 && mode<=2) g_scaling_mode=mode; }

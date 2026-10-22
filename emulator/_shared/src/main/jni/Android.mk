@@ -12,6 +12,6 @@ ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
   LOCAL_ARM_MODE := arm
 endif
 
-LOCAL_LDLIBS := -llog -landroid
+LOCAL_LDLIBS := -llog -landroid -ldl
 
 include $(BUILD_SHARED_LIBRARY)

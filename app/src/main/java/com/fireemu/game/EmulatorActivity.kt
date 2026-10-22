@@ -24,17 +24,21 @@ import com.fireemu.nativebridge.LibretroBridge
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class EmulatorActivity : Activity(), SurfaceHolder.Callback {
+class EmulatorActivity : Activity(), SurfaceHolder.Callback, android.hardware.input.InputManager.InputDeviceListener {
 
     companion object {
         const val EXTRA_CONSOLE_ID = "EXTRA_CONSOLE_ID"
         const val EXTRA_ROM_PATH = "EXTRA_ROM_PATH"
         const val EXTRA_GAME_ID = "EXTRA_GAME_ID"
+        const val EXTRA_RESUME = "EXTRA_RESUME"
         const val EXTRA_GAME_TITLE = "EXTRA_GAME_TITLE"
     }
 
@@ -54,6 +58,10 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback {
     @Volatile private var isPausedForMenu = false
     @Volatile private var fastForward = false
     @Volatile private var showFps = false
+    private val activityScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private var coreReady = false
+    private var sessionRecorded = false
+    private var frameDurationNs = 16_666_666L
 
     private var selectedSlot = 1
     private var currentScaling = VideoScaling.ASPECT_RATIO
@@ -83,7 +91,6 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback {
         setupLayout()
 
         audioEngine = AudioEngine()
-        audioEngine.init()
 
         inputHandler = InputHandler {
             runOnUiThread {
@@ -93,6 +100,21 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback {
                     showOverlay()
                 }
             }
+        }
+        (getSystemService(INPUT_SERVICE) as android.hardware.input.InputManager).registerInputDeviceListener(this, null)
+        loadPreferences()
+    }
+
+    private fun loadPreferences() {
+        activityScope.launch {
+            val repo = FireEmuApp.instance.settingsRepository
+            val settings = repo.getSettings().first()
+            currentScaling = settings.videoScaling
+            showFps = settings.showFps
+            tvFps.visibility = if(showFps) View.VISIBLE else View.GONE
+            btnScaling.text = "Scaling: ${currentScaling.label}"
+            LibretroBridge.nativeSetScaling(currentScaling.id)
+            inputHandler.setBindings(repo.getKeyBindings())
         }
     }
 
@@ -116,7 +138,7 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback {
 
         // FPS Counter text view
         tvFps = TextView(this).apply {
-            setTextColor(Color.YELLOW)
+            setTextColor(Color.WHITE)
             textSize = 16f
             typeface = Typeface.MONOSPACE
             setPadding(24, 24, 24, 24)
@@ -138,7 +160,7 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback {
 
         overlayContainer = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Color.parseColor("#E60F131A")) // 90% dark overlay
+            setBackgroundColor(Color.parseColor("#E6131313")) // 90% dark overlay
             setPadding(48, 36, 48, 36)
             visibility = View.GONE
         }
@@ -166,8 +188,8 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback {
 
     private fun buildOverlayViews(container: LinearLayout) {
         val badgeView = TextView(this).apply {
-            text = "⚡ FIRESPOT IN-GAME"
-            setTextColor(Color.parseColor("#FFB800"))
+            text = "FIRESPOT / PAUSED"
+            setTextColor(Color.parseColor("#BABABA"))
             textSize = 12f
             typeface = Typeface.DEFAULT_BOLD
             setPadding(0, 0, 0, 4)
@@ -184,33 +206,37 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback {
         container.addView(titleView)
 
         val subTitleView = TextView(this).apply {
-            text = "${ConsoleType.fromId(consoleId).displayName} • Low-Latency Direct Core"
-            setTextColor(Color.parseColor("#A7B0C4"))
+            text = "${ConsoleType.fromId(consoleId).displayName} / Game Boy runtime"
+            setTextColor(Color.parseColor("#B0B0B0"))
             textSize = 13f
             setPadding(0, 0, 0, 24)
         }
         container.addView(subTitleView)
 
-        btnResume = createOverlayButton("▶  Resume Playing") { hideOverlay() }
+        btnResume = createOverlayButton("Resume playing") { hideOverlay() }
         btnSlotSelector = createOverlayButton("State Slot: $selectedSlot") { cycleSlot() }
-        btnSaveState = createOverlayButton("💾 Save State (Slot $selectedSlot)") { performSaveState() }
-        btnLoadState = createOverlayButton("↺ Load State (Slot $selectedSlot)") { performLoadState() }
+        btnSaveState = createOverlayButton("Save state (Slot $selectedSlot)") { performSaveState() }
+        btnLoadState = createOverlayButton("Load state (Slot $selectedSlot)") { performLoadState() }
         btnScaling = createOverlayButton("Scaling: ${currentScaling.label}") { cycleScaling() }
         btnFastForward = createOverlayButton("Fast Forward: OFF") { toggleFastForward() }
         btnToggleFps = createOverlayButton("Toggle FPS Overlay") { toggleFps() }
         btnReset = createOverlayButton("Reset Game") { performReset() }
         btnExit = createOverlayButton("Save & Exit to FireSpot") { performExit() }
-        btnExit.setTextColor(Color.parseColor("#FF3D57"))
+        btnExit.setTextColor(Color.parseColor("#686868"))
 
         container.addView(btnResume)
+        container.addView(btnExit)
+        container.addView(createOverlayButton("Controls guide") {
+            android.app.AlertDialog.Builder(this).setTitle("Game controls")
+                .setMessage("D-pad: move\nSelect: A\nPlay/Pause: B\nFast Forward / gamepad Start: Start\nRewind / gamepad Select: Select\nMenu / Back: pause\nKeyboard: arrows / WASD move; Z / J = A; X / K = B; Enter = Start; Right Shift = Select; Escape = pause.\nSaved remaps apply to gameplay. System Menu and Back remain reserved.")
+                .setPositiveButton("Back", null).show()
+        })
         container.addView(btnSlotSelector)
         container.addView(btnSaveState)
         container.addView(btnLoadState)
         container.addView(btnScaling)
-        container.addView(btnFastForward)
         container.addView(btnToggleFps)
         container.addView(btnReset)
-        container.addView(btnExit)
     }
 
     private fun createOverlayButton(label: String, onClick: () -> Unit): Button {
@@ -223,19 +249,20 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback {
             setBackgroundResource(com.fireemu.R.drawable.card_focus_selector)
             val lp = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                (48 * resources.displayMetrics.density).toInt()
+                (40 * resources.displayMetrics.density).toInt()
             )
-            lp.bottomMargin = (10 * resources.displayMetrics.density).toInt()
+            lp.bottomMargin = (6 * resources.displayMetrics.density).toInt()
             layoutParams = lp
             setOnClickListener { onClick() }
         }
     }
 
     private fun showOverlay() {
+        inputHandler.clear()
         isPausedForMenu = true
         audioEngine.pause()
         overlayContainer.visibility = View.VISIBLE
-        btnResume.requestFocus()
+        btnResume.requestFocusFromTouch()
         updateSlotInfo()
     }
 
@@ -271,6 +298,8 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback {
             VideoScaling.INTEGER_SCALE -> VideoScaling.STRETCH_FULLSCREEN
             VideoScaling.STRETCH_FULLSCREEN -> VideoScaling.ASPECT_RATIO
         }
+        LibretroBridge.nativeSetScaling(currentScaling.id)
+        activityScope.launch { FireEmuApp.instance.settingsRepository.setVideoScaling(currentScaling) }
         btnScaling.text = "Scaling: ${currentScaling.label}"
         Toast.makeText(this, "Scaling: ${currentScaling.label}", Toast.LENGTH_SHORT).show()
     }
@@ -283,6 +312,7 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback {
     private fun toggleFps() {
         showFps = !showFps
         tvFps.visibility = if (showFps) View.VISIBLE else View.GONE
+        activityScope.launch { FireEmuApp.instance.settingsRepository.setFpsVisible(showFps) }
     }
 
     private fun performSaveState() {
@@ -321,24 +351,41 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback {
 
     private fun saveAutoState() {
         val autoPath = getStatePath(99)
-        LibretroBridge.nativeSaveState(autoPath)
+        LibretroBridge.nativeBatteryRam(batteryPath(), true)
+        val next = File("$autoPath.next")
+        if(LibretroBridge.nativeSaveState(next.absolutePath)) {
+            try {
+                val current=File(autoPath);val first=File("$autoPath.bak1");val second=File("$autoPath.bak2")
+                if(first.isFile) first.copyTo(second,overwrite=true)
+                if(current.isFile) current.copyTo(first,overwrite=true)
+                check(next.renameTo(current))
+            } catch(_:Exception) {next.delete()}
+        }
+    }
+
+    private fun batteryPath():String {
+        val dir=File(filesDir,"battery/$consoleId").apply {mkdirs()}
+        val id=java.security.MessageDigest.getInstance("SHA-256").digest(romPath.toByteArray()).joinToString("") {"%02x".format(it)}
+        return File(dir,"$id.srm").absolutePath
     }
 
     private fun checkAndLoadAutoState() {
         val autoPath = getStatePath(99)
-        val autoFile = File(autoPath)
-        if (autoFile.exists() && autoFile.length() > 0) {
-            val ok = LibretroBridge.nativeLoadState(autoPath)
-            if (ok) {
-                runOnUiThread {
-                    Toast.makeText(this, "Auto-State Resumed", Toast.LENGTH_SHORT).show()
-                }
+        val candidates=listOf(autoPath,"$autoPath.bak1","$autoPath.bak2")
+        for((index,path) in candidates.withIndex()) {
+            val file=File(path)
+            if(file.isFile && file.length()>0 && LibretroBridge.nativeLoadState(path)) {
+                android.util.Log.i("FireSpotRuntime",if(index==0) "Autosave restored" else "Recovered autosave backup $index")
+                Toast.makeText(this,if(index==0) "Auto-State Resumed" else "Recovered an earlier autosave",Toast.LENGTH_SHORT).show()
+                return
             }
         }
+        Toast.makeText(this,"Save could not be restored. Starting the game with cartridge progress.",Toast.LENGTH_LONG).show()
     }
 
     private fun recordSessionTime() {
-        if (gameId > 0) {
+        if (gameId > 0 && !sessionRecorded) {
+            sessionRecorded = true;
             val elapsedSec = (System.currentTimeMillis() - sessionStartTime) / 1000
             if (elapsedSec > 0) {
                 CoroutineScope(Dispatchers.IO).launch {
@@ -352,15 +399,34 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback {
 
     override fun surfaceCreated(holder: SurfaceHolder) {
         val console = ConsoleType.fromId(consoleId)
-        val coreLibPath = File(applicationInfo.nativeLibraryDir, console.coreLibName).absolutePath
+        try {
+            if (!coreReady) {
+                val cores = FireEmuApp.instance.coreRepository
+                check(cores.isCoreAvailable(console)) { "Console support is not installed. Return to setup to add it." }
+                check(LibretroBridge.nativeInitCore(cores.getCorePath(console))) { "Console software could not load on this device." }
+                check(LibretroBridge.nativeLoadGame(romPath, cores.getBiosDirectory())) { "The game could not be loaded." }
+                val timing = checkNotNull(LibretroBridge.nativeGetTiming())
+                check(timing[0].isFinite() && timing[0] in 1.0..240.0 && timing[1].isFinite() && timing[1] in 8000.0..192000.0) { "Invalid console timing." }
+                frameDurationNs = (1_000_000_000.0 / timing[0]).toLong()
+                audioEngine.init(timing[1].toInt())
+                coreReady = true
+                LibretroBridge.nativeBatteryRam(batteryPath(), false)
+                if (intent.getBooleanExtra(EXTRA_RESUME, false)) checkAndLoadAutoState()
+            }
+            check(LibretroBridge.nativeSetSurface(holder.surface, 1280, 720))
+            startEmulationLoop()
+        } catch (error: Exception) {
+            showLaunchError(error.message ?: "The game could not start.")
+        } catch (error: LinkageError) {
+            showLaunchError("The native runtime could not load on this device.")
+        }
+    }
 
-        LibretroBridge.nativeInitCore(coreLibPath)
-        LibretroBridge.nativeSetSurface(holder.surface, 1280, 720)
-        val biosDir = File("/sdcard/ROMs/bios").absolutePath
-        LibretroBridge.nativeLoadGame(romPath, biosDir)
-
-        checkAndLoadAutoState()
-        startEmulationLoop()
+    private fun showLaunchError(message: String) {
+        android.util.Log.e("FireSpotRuntime", message)
+        android.app.AlertDialog.Builder(this).setTitle("Unable to start game")
+            .setMessage(message).setPositiveButton("Back to library") { _, _ -> finish() }
+            .setOnCancelListener { finish() }.show()
     }
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
@@ -372,11 +438,12 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback {
     }
 
     private fun startEmulationLoop() {
+        if (!coreReady || isRunning) return
         isRunning = true
         audioEngine.start()
 
         emulationThread = Thread {
-            val targetFrameNs = 16_666_666L // 60 FPS
+            val targetFrameNs = frameDurationNs
             var frameCount = 0
             var fpsTimer = System.currentTimeMillis()
 
@@ -386,9 +453,7 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback {
                 if (!isPausedForMenu) {
                     val input = inputHandler.getBitmask()
                     LibretroBridge.nativeRunFrame(input)
-                    if (fastForward) {
-                        LibretroBridge.nativeRunFrame(input)
-                    }
+
                     frameCount++
                 }
 
@@ -405,7 +470,7 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback {
                 }
 
                 val elapsedNs = System.nanoTime() - frameStart
-                val sleepNs = if (fastForward) (targetFrameNs / 2) - elapsedNs else targetFrameNs - elapsedNs
+                val sleepNs = targetFrameNs - elapsedNs
                 if (sleepNs > 0) {
                     try {
                         Thread.sleep(sleepNs / 1_000_000L, (sleepNs % 1_000_000L).toInt())
@@ -430,7 +495,7 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback {
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (overlayContainer.visibility == View.VISIBLE) {
-            if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (keyCode in listOf(KeyEvent.KEYCODE_BACK,KeyEvent.KEYCODE_ESCAPE,KeyEvent.KEYCODE_F1)) {
                 hideOverlay()
                 return true
             }
@@ -449,33 +514,46 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback {
     }
 
     override fun onGenericMotionEvent(event: MotionEvent): Boolean {
+        if (overlayContainer.visibility == View.VISIBLE) return super.onGenericMotionEvent(event)
         if (inputHandler.handleMotionEvent(event)) return true
         return super.onGenericMotionEvent(event)
     }
 
     override fun onPause() {
         super.onPause()
-        saveAutoState()
+        inputHandler.clear()
         stopEmulationLoop()
+        if (coreReady) saveAutoState()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (!hasFocus && ::inputHandler.isInitialized) inputHandler.clear()
     }
 
     override fun onResume() {
         super.onResume()
-        if (surfaceView.holder.surface.isValid && !isRunning) {
+        if (coreReady && surfaceView.holder.surface.isValid && !isRunning) {
             startEmulationLoop()
         }
     }
 
     override fun onLowMemory() {
         super.onLowMemory()
-        saveAutoState()
+        if (coreReady) saveAutoState()
     }
 
+    override fun onInputDeviceAdded(deviceId:Int) {}
+    override fun onInputDeviceChanged(deviceId:Int) { if(::inputHandler.isInitialized) inputHandler.clear() }
+    override fun onInputDeviceRemoved(deviceId:Int) { if(::inputHandler.isInitialized) inputHandler.clear() }
+
     override fun onDestroy() {
+        (getSystemService(INPUT_SERVICE) as android.hardware.input.InputManager).unregisterInputDeviceListener(this)
         super.onDestroy()
         recordSessionTime()
         stopEmulationLoop()
+        activityScope.cancel()
         audioEngine.release()
-        LibretroBridge.nativeDestroy()
+        try { LibretroBridge.nativeDestroy() } catch (_: LinkageError) { }
     }
 }
