@@ -13,3 +13,5 @@ local.properties
 roms/
 artifacts/
 __pycache__/
+/app/build
+/artifacts
