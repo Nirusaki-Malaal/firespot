@@ -33,6 +33,32 @@ class ConsoleIntegrationTest {
         ZipOutputStream(buffer).use {out->names.forEach {name->out.putNextEntry(ZipEntry(name));out.write(bytes("input-colour.nes"));out.closeEntry()}}
         return buffer.toByteArray()
     }
+    @Test fun importLocalDemoGames()=runBlocking {
+        val folder=File(context.filesDir,"demo-import")
+        org.junit.Assume.assumeTrue("Optional local demo assets are not staged", folder.isDirectory)
+        val imported=JSONArray()
+        folder.listFiles()!!.filter {it.isFile && it.extension.lowercase() in CartridgeImporter.extensions}.sortedBy {it.name}.forEach {file->
+            val game=file.inputStream().use {importer.import(it,file.name)}
+            val core=FireEmuApp.instance.downloads.core(game.console) ?: error("Missing core for ${game.consoleId}")
+            val target=FireEmuApp.instance.downloads.coreFile(core)
+            if(!target.exists()) {target.parentFile!!.mkdirs();target.writeBytes(bytes("${core.id}.so"))}
+            val artifact=core.artifacts.first {it.abi=="x86_64"}
+            com.fireemu.data.catalog.CatalogSecurity.verifyFile(target,artifact.bytes,artifact.sha256,"x86_64")
+            imported.put(JSONObject().put("id",game.id).put("title",game.cleanTitle).put("console",game.consoleId).put("path",game.romPath))
+        }
+        File(context.filesDir,"demo-games.json").writeText(imported.toString(2))
+        assertTrue(imported.length()>0)
+    }
+    @Test fun quickTapReachesOneFrameAndDoesNotStick() {
+        val handler=com.fireemu.game.InputHandler {}
+        handler.handleKeyEvent(android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN,android.view.KeyEvent.KEYCODE_Z))
+        handler.handleKeyEvent(android.view.KeyEvent(android.view.KeyEvent.ACTION_UP,android.view.KeyEvent.KEYCODE_Z))
+        assertEquals(1 shl 8,handler.getBitmask())
+        assertEquals(0,handler.getBitmask())
+        handler.handleKeyEvent(android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN,android.view.KeyEvent.KEYCODE_DPAD_RIGHT))
+        handler.clear()
+        assertEquals(0,handler.getBitmask())
+    }
     @Test fun archiveImportIsBoundedAndDeduplicated()=runBlocking {
         val first=importer.import(ByteArrayInputStream(zip("nested/Validation.nes")),"download.zip")
         try {

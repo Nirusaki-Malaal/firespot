@@ -60,7 +60,7 @@
             android:launchMode="singleTask"
             android:exported="false" />
 
-        <activity android:name=".ui.screens.browser.GameBrowserActivity"
+        <activity android:name=".ui.screens.browser.GameBrowserActivity" android:process=":browser"
             android:screenOrientation="landscape" android:exported="false"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize" />
 

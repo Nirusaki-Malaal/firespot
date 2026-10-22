@@ -48,6 +48,7 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback, android.hardware.in
     private var gameTitle: String = ""
 
     private lateinit var surfaceView: SurfaceView
+    private lateinit var overlayScroll: ScrollView
     private lateinit var overlayContainer: LinearLayout
     private lateinit var tvFps: TextView
     private lateinit var audioEngine: AudioEngine
@@ -154,7 +155,8 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback, android.hardware.in
         )
 
         // In-game Pause Overlay Menu
-        val scrollView = ScrollView(this).apply {
+        overlayScroll = ScrollView(this).apply {
+            visibility = View.GONE
             isFillViewport = true
         }
 
@@ -166,7 +168,7 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback, android.hardware.in
         }
 
         buildOverlayViews(overlayContainer)
-        scrollView.addView(
+        overlayScroll.addView(
             overlayContainer,
             ViewGroup.LayoutParams(
                 (420 * resources.displayMetrics.density).toInt(),
@@ -175,7 +177,7 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback, android.hardware.in
         )
 
         rootLayout.addView(
-            scrollView,
+            overlayScroll,
             FrameLayout.LayoutParams(
                 (420 * resources.displayMetrics.density).toInt(),
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -206,7 +208,7 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback, android.hardware.in
         container.addView(titleView)
 
         val subTitleView = TextView(this).apply {
-            text = "${ConsoleType.fromId(consoleId).displayName} / Game Boy runtime"
+            text = "${ConsoleType.fromId(consoleId).displayName} / ${FireEmuApp.instance.downloads.core(ConsoleType.fromId(consoleId))?.title ?: "Libretro"}"
             setTextColor(Color.parseColor("#B0B0B0"))
             textSize = 13f
             setPadding(0, 0, 0, 24)
@@ -222,7 +224,7 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback, android.hardware.in
         btnToggleFps = createOverlayButton("Toggle FPS Overlay") { toggleFps() }
         btnReset = createOverlayButton("Reset Game") { performReset() }
         btnExit = createOverlayButton("Save & Exit to FireSpot") { performExit() }
-        btnExit.setTextColor(Color.parseColor("#686868"))
+        btnExit.setTextColor(Color.WHITE)
 
         container.addView(btnResume)
         container.addView(btnExit)
@@ -261,6 +263,7 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback, android.hardware.in
         inputHandler.clear()
         isPausedForMenu = true
         audioEngine.pause()
+        overlayScroll.visibility = View.VISIBLE
         overlayContainer.visibility = View.VISIBLE
         btnResume.requestFocusFromTouch()
         updateSlotInfo()
@@ -268,6 +271,8 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback, android.hardware.in
 
     private fun hideOverlay() {
         overlayContainer.visibility = View.GONE
+        overlayScroll.visibility = View.GONE
+        inputHandler.clear()
         isPausedForMenu = false
         audioEngine.start()
     }
@@ -493,24 +498,18 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback, android.hardware.in
         audioEngine.pause()
     }
 
-    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (!::inputHandler.isInitialized) return super.dispatchKeyEvent(event)
         if (overlayContainer.visibility == View.VISIBLE) {
-            if (keyCode in listOf(KeyEvent.KEYCODE_BACK,KeyEvent.KEYCODE_ESCAPE,KeyEvent.KEYCODE_F1)) {
-                hideOverlay()
+            if (event.keyCode in listOf(KeyEvent.KEYCODE_BACK,KeyEvent.KEYCODE_ESCAPE,KeyEvent.KEYCODE_F1,KeyEvent.KEYCODE_MENU)) {
+                if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) hideOverlay()
                 return true
             }
-            return super.onKeyDown(keyCode, event)
+            return super.dispatchKeyEvent(event)
         }
+        // Capture before an invisible/focused View can consume game buttons.
         if (inputHandler.handleKeyEvent(event)) return true
-        return super.onKeyDown(keyCode, event)
-    }
-
-    override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
-        if (overlayContainer.visibility == View.VISIBLE) {
-            return super.onKeyUp(keyCode, event)
-        }
-        if (inputHandler.handleKeyEvent(event)) return true
-        return super.onKeyUp(keyCode, event)
+        return super.dispatchKeyEvent(event)
     }
 
     override fun onGenericMotionEvent(event: MotionEvent): Boolean {

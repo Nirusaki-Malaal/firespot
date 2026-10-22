@@ -22,7 +22,14 @@ def wait(value):
 def click(value):
  t=wait(value)
  nodes=[n for n in t.iter('node') if n.get('text','')==value] or [n for n in t.iter('node') if value in n.get('text','')]
- n=nodes[0];x,y,a,b=map(int,re.findall(r'\d+',n.get('bounds')))
+ parents={child:parent for parent in t.iter() for child in parent}
+ def actionable(node):
+  while node is not None:
+   if node.get('clickable')=='true':return node
+   node=parents.get(node)
+  return None
+ n=next((actionable(node) for node in nodes if actionable(node) is not None),nodes[0])
+ x,y,a,b=map(int,re.findall(r'\d+',n.get('bounds')))
  assert n.get('enabled')!='false',f'{value} is disabled'
  shell('input','tap',str((x+a)//2),str((y+b)//2))
 def key(code):shell('input','keyevent',code)

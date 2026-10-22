@@ -33,7 +33,7 @@ static void poll(void){}
 static int16_t input(unsigned port,unsigned dev,unsigned index,unsigned id){return port==0 && dev==RETRO_DEVICE_JOYPAD && id<16 && (held&(1<<id))?1:0;}
 #define LOAD(type,name) type name=(type)dlsym(lib,#name);if(!name){fprintf(stderr,"Missing %s\n",#name);return 3;}
 int main(int argc,char **argv) {
- if(argc!=3)return 2;alarm(90);
+ if(argc<3)return 2;alarm(180);
  void *lib=dlopen(argv[1],RTLD_NOW|RTLD_LOCAL);if(!lib){fprintf(stderr,"%s\n",dlerror());return 3;}
  typedef void(*void_fn)(void);typedef void(*env_fn)(retro_environment_t);typedef void(*video_fn)(retro_video_refresh_t);typedef void(*sample_fn)(retro_audio_sample_t);typedef void(*batch_fn)(retro_audio_sample_batch_t);typedef void(*poll_fn)(retro_input_poll_t);typedef void(*input_fn)(retro_input_state_t);typedef void(*info_fn)(struct retro_system_info*);typedef bool(*load_fn)(const struct retro_game_info*);typedef size_t(*size_fn)(void);typedef bool(*state_fn)(void*,size_t);typedef bool(*restore_fn)(const void*,size_t);typedef void(*port_fn)(unsigned,unsigned);
  LOAD(env_fn,retro_set_environment);LOAD(video_fn,retro_set_video_refresh);LOAD(sample_fn,retro_set_audio_sample);LOAD(batch_fn,retro_set_audio_sample_batch);LOAD(poll_fn,retro_set_input_poll);LOAD(input_fn,retro_set_input_state);LOAD(void_fn,retro_init);LOAD(void_fn,retro_deinit);LOAD(info_fn,retro_get_system_info);LOAD(load_fn,retro_load_game);LOAD(void_fn,retro_unload_game);LOAD(void_fn,retro_run);LOAD(void_fn,retro_reset);LOAD(size_fn,retro_serialize_size);LOAD(state_fn,retro_serialize);LOAD(restore_fn,retro_unserialize);LOAD(port_fn,retro_set_controller_port_device);
@@ -45,6 +45,17 @@ int main(int argc,char **argv) {
  retro_set_controller_port_device(0,RETRO_DEVICE_JOYPAD);
  for(int i=0;i<180;i++)retro_run();uint64_t before=hash;
  held=(1<<RETRO_DEVICE_ID_JOYPAD_RIGHT);for(int i=0;i<30;i++)retro_run();held=0;uint64_t pressed=hash;
+ if(argc>3) {
+   unsigned stress=(unsigned)atoi(argv[3]);
+   for(unsigned i=0;i<stress;i++) {
+     /* Exercise start/actions/directions across menus and scenes; not a proof of every mechanic. */
+     held=(i%120<12)?(1<<RETRO_DEVICE_ID_JOYPAD_START):
+          (i%60<10)?(1<<RETRO_DEVICE_ID_JOYPAD_A):
+          (i%90<20)?(1<<RETRO_DEVICE_ID_JOYPAD_RIGHT):0;
+     retro_run();
+   }
+   held=0;
+ }
  size_t size=retro_serialize_size();void *state=size && size<64*1024*1024?malloc(size):NULL;
  bool saved=state && retro_serialize(state,size);uint64_t expected=0;bool restored=false;
  if(saved){for(int i=0;i<5;i++)retro_run();expected=hash;if(retro_unserialize(state,size)){for(int i=0;i<5;i++)retro_run();restored=expected==hash;}}

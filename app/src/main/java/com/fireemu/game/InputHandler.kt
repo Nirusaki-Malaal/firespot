@@ -38,10 +38,12 @@ class InputHandler(
     private var startHeld = false
     private var backDownTime = 0L
 
-    fun getBitmask(): Int = currentBitmask
+    private val pendingPresses = java.util.concurrent.atomic.AtomicInteger(0)
+    fun getBitmask(): Int = currentBitmask or pendingPresses.getAndSet(0)
 
     fun clear() {
         currentBitmask = 0
+        pendingPresses.set(0)
         pressedKeys.clear()
         keyBitmask = 0
         hatBitmask = 0
@@ -50,6 +52,7 @@ class InputHandler(
     }
 
     fun handleKeyEvent(event: KeyEvent): Boolean {
+        if(event.action != KeyEvent.ACTION_DOWN && event.action != KeyEvent.ACTION_UP) return false
         val keyCode = event.keyCode
         val isDown = event.action == KeyEvent.ACTION_DOWN
 
@@ -81,7 +84,10 @@ class InputHandler(
         val retroBtn = mapKeyCodeToRetro(keyCode)
         if (retroBtn >= 0) {
             val token = (event.deviceId.toLong() shl 32) or (keyCode.toLong() and 0xffffffffL)
-            if (isDown) pressedKeys[token] = retroBtn else pressedKeys.remove(token)
+            if (isDown) {
+                pressedKeys[token] = retroBtn
+                if(event.repeatCount == 0) pendingPresses.getAndUpdate { it or (1 shl retroBtn) }
+            } else pressedKeys.remove(token)
             keyBitmask = pressedKeys.values.fold(0) {mask, button -> mask or (1 shl button)}
             selectHeld = keyBitmask and (1 shl BTN_SELECT) != 0
             startHeld = keyBitmask and (1 shl BTN_START) != 0
