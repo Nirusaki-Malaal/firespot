@@ -8,17 +8,17 @@ The [phase1-v2 release](https://github.com/Nirusaki-Malaal/firespot-cores/releas
 
 | System | Core | FireSpot status |
 |---|---|---|
-| Game Boy | Gambatte | Original and diagnostic gameplay exercised on local Android; Fire TV acceptance pending |
-| Game Boy Color | Gambatte | Diagnostic gameplay exercised on local Android; more color-title coverage pending |
-| NES / Famicom | FCEUmm | Actual-title gameplay, input, audio, save/restore and reset exercised on local Android; Fire TV acceptance pending |
-| Game Boy Advance | mGBA | User-provided FireRed gameplay, controls, saves and resume exercised on local Android; Fire TV acceptance pending |
-| SNES / Super Famicom | bsnes 2014 Performance | Actual-title video/audio/input, save/restore and reset exercised on local Android; target-device checks pending |
-| Master System | Gearsystem | Actual-title video/audio, save/restore and reset exercised on local Android; broader controls and target-device checks pending |
-| Game Gear | Gearsystem | Video and save/restore exercised on local Android; audible output and target-device checks pending |
-| SG-1000 | Gearsystem | Actual-title video/audio and save/restore exercised on local Android; broader controls and target-device checks pending |
-| PlayStation | PCSX ReARMed | Actual-title video/audio and save/restore exercised on local Android; input response, BIOS/disc workflow and target-device checks pending |
+| Game Boy | Gambatte | Actual-title video/audio/save/reset and diagnostic input response exercised on local Android; Fire TV acceptance pending |
+| Game Boy Color | Gambatte | Actual-title video/audio/save/reset and diagnostic input response exercised on local Android; more title coverage pending |
+| NES / Famicom | FCEUmm | Actual-title video/audio/input/save/restore/reset exercised on local Android; Fire TV acceptance pending |
+| Game Boy Advance | mGBA | User-provided FireRed video/audio/input/save/restore/reset exercised on local Android; Fire TV acceptance pending |
+| SNES / Super Famicom | bsnes 2014 Performance | Actual-title video/audio/input/save/restore/reset exercised on local Android; target-device checks pending |
+| Master System | Gearsystem | Actual-title video/audio/save/reset and diagnostic input response exercised on local Android; target-device checks pending |
+| Game Gear | Gearsystem | Diagnostic video/audio/input/save/reset passed; actual Hermano test rendered and saved, but emitted no nonzero audio samples and no scripted visible input response |
+| SG-1000 | Gearsystem | Actual-title video/audio/save/reset and diagnostic input response exercised on local Android; target-device checks pending |
+| PlayStation | PCSX ReARMed | Actual-title video/audio/save/restore/reset exercised on local Android; scripted visible input response and target-device tests pending |
 
-Gambatte is included in the optional bundled Game Boy build. Standard downloads console support. The public release includes each core's exact source archive, commit and license. No BIOS or commercial ROMs are supplied.
+Gambatte is included in the bundled Game Boy build. Standard downloads console support. The public release includes each core's exact source archive, commit and license. No BIOS or commercial ROMs are supplied.
 
 ## Expansion candidates
 

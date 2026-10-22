@@ -35,9 +35,10 @@ class ConsoleIntegrationTest {
     }
     @Test fun importLocalDemoGames()=runBlocking {
         val folder=File(context.filesDir,"demo-import")
-        org.junit.Assume.assumeTrue("Optional local demo assets are not staged", folder.isDirectory)
+        val localGames=folder.listFiles()?.filter {it.isFile && it.extension.lowercase() in CartridgeImporter.extensions}.orEmpty()
+        org.junit.Assume.assumeTrue("Optional local game assets are not staged", localGames.isNotEmpty())
         val imported=JSONArray()
-        folder.listFiles()!!.filter {it.isFile && it.extension.lowercase() in CartridgeImporter.extensions}.sortedBy {it.name}.forEach {file->
+        localGames.sortedBy {it.name}.forEach {file->
             val game=file.inputStream().use {importer.import(it,file.name)}
             val core=FireEmuApp.instance.downloads.core(game.console) ?: error("Missing core for ${game.consoleId}")
             val target=FireEmuApp.instance.downloads.coreFile(core)
