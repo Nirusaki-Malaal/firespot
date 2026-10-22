@@ -240,6 +240,7 @@ fun FireEmuNavGraph(
         composable(Screen.Discover.route) {
             com.fireemu.ui.screens.discover.DiscoverScreen(
                 onOpenGame = {navController.navigate(Screen.Details.createRoute(it))},
+                onImportGame = {navController.navigate(Screen.Settings.route)},
                 onBack = {navController.popBackStack()}
             )
         }
