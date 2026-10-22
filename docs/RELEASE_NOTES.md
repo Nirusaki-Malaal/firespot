@@ -1,3 +1,12 @@
+# FireSpot 1.0.0
+
+- Standard Android release build version 1.0.0, versionCode 4; console cores remain separately downloadable.
+- The embedded catalog metadata is re-signed and verified with the trusted public key.
+- Recorded a 3:05 gameplay walkthrough with active NES, Game Boy Color and FireRed footage, captions and an audible audio track.
+- Local Android bridge integration exercised all nine published systems for import, video callback, state save/restore and reset. NES, GB/GBC, GBA and Sega diagnostics also produced nonzero audio and input-driven video changes.
+- SNES diagnostics produced frames, but its test fixture did not produce nonzero audio or visible input changes; a separate Space Rescue Squad gameplay run did render and respond. The PS1 test image reached its menu, but starting gameplay stalled on a black/loading screen in the current AOSP emulator run.
+- Fire OS has been tested by the project owner. The automated checks in this release record ran on a local Android test environment.
+
 # FireSpot 0.3.0
 
 - Console-first native discovery, catalog keyboard search, installed-only view, console filters and alphabetical/size/year sorting.

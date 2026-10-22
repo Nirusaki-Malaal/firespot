@@ -1,12 +1,12 @@
 # FireSpot product and implementation plan
 
-Phase 0 now has a self-contained demo APK with a Game Boy core and two original games, plus a separate standard APK without emulator cores. The monochrome launcher exposes implemented features only. Builds, lint, host emulation, artifact integrity, and the local Android walkthrough pass. Official Fire TV runtime acceptance is pending. See [current evidence and setup](docs/PHASE_0.md); roadmap entries below remain proposals unless that record marks them verified.
+The standard APK uses a native Libretro bridge and downloads signed console cores when needed. The optional bundled Game Boy build remains available for offline evaluation. Builds, lint, artifact integrity, and local Android runtime checks are recorded in [validation](docs/VALIDATION.md); roadmap entries below describe future work.
 
 ## Current delivery milestones
 
 - Phase 1: signed on-demand core packages, original homebrew discovery and keyboard support are implemented and exercised on local Android. Public binaries/source: https://github.com/Nirusaki-Malaal/firespot-cores.
 - Phase 2 initiated: console/genre filters, cartridge RAM persistence, rotating autosaves and input cleanup. Family profiles, multiplayer, cloud saves, a storage manager and broad console gameplay validation remain future work.
-- Phase 3 initiated: public source/meaningful commits, CI, signed release automation, screenshots, technical docs and a submission guide. Official Fire TV acceptance and the final demo video remain required.
+- Phase 3: public source, CI, signed release automation, screenshots, technical docs and a submission guide are in place. The gameplay walkthrough is recorded; target-device acceptance still depends on the selected Fire TV test environment.
 
 Detailed implemented behavior: [documentation](docs/DOCUMENTATION.md). Measured/tested boundaries: [validation](docs/VALIDATION.md). These milestones distinguish shipped functionality from the larger P1/P2 proposals below.
 
@@ -16,7 +16,7 @@ Turn a Fire OS TV into an easy-to-use retro gaming hub: bring a game, let FireSp
 
 The experience should be complete without an account. After games and required console software are installed, local play, saves, controller settings, and library browsing should work offline. Online services enhance the experience but must not sit between a person and an installed game.
 
-This is a proposed roadmap, not a list of implemented features. P0 is the hackathon scope; P1 completes the everyday experience; P2 adds differentiators after the foundation works. Dependency gates override priority: never demonstrate an installation or compatibility claim that has not been verified.
+This is a proposed roadmap, not a list of implemented features. The release baseline covers core acquisition, game discovery and play; P1 completes the everyday experience; P2 adds differentiators. Dependency gates override priority: compatibility claims must match observed test results.
 
 ## Product principles
 
@@ -88,7 +88,7 @@ Use a short description, a specific cause when known, and a next action. Example
 
 ## Feature roadmap
 
-### P0 — credible hackathon experience
+### Release baseline
 
 | Feature | User benefit | Completion evidence |
 |---|---|---|
@@ -193,7 +193,7 @@ Prefer a minimal hosted static catalog and versioned artifacts initially. A dyna
 
 These are acceptance targets, not measured results. Test on the selected official Fire TV virtual device and report its exact OS, process ABI, memory constraints, and test limitations. Virtual testing does not establish physical Bluetooth behavior or real-stick performance.
 
-- **Usability:** every P0 path can be completed without touch, a mouse, or typed paths; errors and dialogs have a clear exit.
+- **Usability:** every release-baseline path can be completed without touch, a mouse, or typed paths; errors and dialogs have a clear exit.
 - **Integrity:** tampered manifest/artifact, wrong architecture, unsupported version, and unsafe archive cases are rejected before loading.
 - **Input:** test simultaneous buttons, key/hat overlap, key repeat, pause/resume, focus loss, and disconnect; test analog/multiplayer once implemented.
 - **Progress:** native save RAM and supported state files survive restart; interrupted writes retain a known good version; separate profiles never overwrite each other.
@@ -230,7 +230,7 @@ For the imminent deadline, stop feature expansion once M0–M3 are demonstrable 
 Success means a judge can reproduce the central promise: add a game, prepare its console, play with TV controls, and return to preserved progress.
 
 Reviewed upstream https://github.com/shubhfront/firespot at e3858c819b4c2b4f3cb810acf5cc6179530efdfe on October 22, 2026.
-At initial review the local workspace was empty and source was inspected in a separate temporary checkout. Subsequent Phase 0 changes and verification are recorded in docs/PHASE_0.md.
+The current source checkout and validation record document the implementation and test evidence.
 
 ## Demo target and deadline
 

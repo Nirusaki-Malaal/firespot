@@ -20,8 +20,8 @@ android {
         applicationId = "com.fireemu"
         minSdk = 28
         targetSdk = 30
-        versionCode = 3
-        versionName = "0.3.0"
+        versionCode = 4
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

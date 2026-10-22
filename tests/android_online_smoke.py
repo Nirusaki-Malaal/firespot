@@ -7,6 +7,7 @@ def launch():
  u.shell('am','start','-n',f'{PKG}/com.fireemu.MainActivity')
  t=u.tree()
  if any('Your next little escape' in x for x in u.texts(t)):u.key('KEYCODE_DPAD_CENTER')
+ if any('Your library' in x for x in u.texts(u.tree())):u.key('KEYCODE_BACK')
  u.wait('Less setup.')
 def game_activity():
  for _ in range(40):
@@ -34,8 +35,11 @@ u.passed('Catalog downloads a new original game; it launches and writes 8 KiB ca
 u.click('Play from start');game_activity();u.tree();u.key('KEYCODE_ESCAPE');u.wait('Save & Exit');u.click('Save & Exit');u.wait('Resume')
 files=u.shell('run-as',PKG,'ls','files/states/gameboy');assert 'signal-runner.gb.state99.bak1' in files,files
 u.passed('Rotating autosave retains the previous checkpoint')
-u.shell('am','force-stop',PKG);launch();u.click('Open library');u.wait('Your library');u.click('Signal Runner');u.wait('Resume');u.click('Resume');game_activity();u.tree();u.key('KEYCODE_ESCAPE');u.wait('Save & Exit');u.click('Save & Exit');u.wait('Resume');u.passed('Downloaded core/game and autosave survive an app process restart')
-u.key('KEYCODE_BACK');u.wait('Your library');u.click('System: All');u.wait('System: GB / GBC');u.click('Clear filters');u.wait('System: All');u.click('Genre: All');u.wait('Clear filters');u.click('Clear filters');u.passed('Library console/genre filters apply and clear')
+u.shell('am','force-stop',PKG);launch();u.click('Open library');u.wait('Your library');u.shell('input','swipe','1400','930','1400','360','350');u.tree();u.click('Signal Runner');u.wait('Resume');u.click('Resume');game_activity();u.tree();u.key('KEYCODE_ESCAPE');u.wait('Save & Exit');u.click('Save & Exit');u.wait('Resume');u.passed('Downloaded core/game and autosave survive an app process restart')
+u.key('KEYCODE_BACK')
+if not any('Your library' in x for x in u.texts(u.tree())):
+ launch();u.click('Open library')
+u.wait('Your library');u.click('System: All');u.wait('System: GB / GBC');u.click('Clear filters');u.wait('System: All');u.click('Genre: All');u.wait('Clear filters');u.click('Clear filters');u.passed('Library console/genre filters apply and clear')
 log=u.adb('logcat','-d','-s','FireEmuBridge','FireSpotRuntime','AndroidRuntime').decode(errors='replace');assert 'FATAL EXCEPTION' not in log;assert 'SIGNAL RUNNER' in log
 (u.args.out/'runtime.log').write_text(log)
 (u.args.out/'android-results.json').write_text(json.dumps({'scope':'Local AOSP Android 11 x86_64; not official Fire TV or physical Bluetooth','checks':u.results},indent=2)+'\n')

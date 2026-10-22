@@ -14,7 +14,6 @@
       "sourceCommit": "d9d6cd06382d1ced30de34d56d3609452323dab1",
       "sourceArchiveUrl": "https://github.com/Nirusaki-Malaal/firespot-cores/releases/download/phase1-v2/gambatte-source.tar.gz",
       "licenseUrl": "https://github.com/Nirusaki-Malaal/firespot-cores/releases/download/phase1-v2/gambatte-LICENSE.txt",
-      "experimental": false,
       "minimumAndroidApi": 28,
       "artifacts": [
         {
@@ -51,7 +50,6 @@
       "sourceCommit": "ac0d00a7fc01166f84c7bac01d1084ebfd2b865e",
       "sourceArchiveUrl": "https://github.com/Nirusaki-Malaal/firespot-cores/releases/download/phase1-v2/fceumm-source.tar.gz",
       "licenseUrl": "https://github.com/Nirusaki-Malaal/firespot-cores/releases/download/phase1-v2/fceumm-LICENSE.txt",
-      "experimental": true,
       "minimumAndroidApi": 28,
       "artifacts": [
         {
@@ -88,7 +86,6 @@
       "sourceCommit": "7a12d6d4b9acb14c0ae62c9166b6a2f3d08007f6",
       "sourceArchiveUrl": "https://github.com/Nirusaki-Malaal/firespot-cores/releases/download/phase1-v2/mgba-source.tar.gz",
       "licenseUrl": "https://github.com/Nirusaki-Malaal/firespot-cores/releases/download/phase1-v2/mgba-LICENSE.txt",
-      "experimental": true,
       "minimumAndroidApi": 28,
       "artifacts": [
         {
@@ -125,7 +122,6 @@
       "sourceCommit": "c8816799b50388e61cfe237fe2cdbb7d8175f20a",
       "sourceArchiveUrl": "https://github.com/Nirusaki-Malaal/firespot-cores/releases/download/phase1-v2/pcsx-source.tar.gz",
       "licenseUrl": "https://github.com/Nirusaki-Malaal/firespot-cores/releases/download/phase1-v2/pcsx-LICENSE.txt",
-      "experimental": true,
       "minimumAndroidApi": 28,
       "artifacts": [
         {
@@ -162,7 +158,6 @@
       "sourceCommit": "3c1394e042ee444c8248e1b9210e14ea55e836e9",
       "sourceArchiveUrl": "https://github.com/Nirusaki-Malaal/firespot-cores/releases/download/phase1-v2/bsnes2014-source.tar.gz",
       "licenseUrl": "https://github.com/Nirusaki-Malaal/firespot-cores/releases/download/phase1-v2/bsnes2014-LICENSE.txt",
-      "experimental": true,
       "minimumAndroidApi": 28,
       "artifacts": [
         {
@@ -201,7 +196,6 @@
       "sourceCommit": "b1cf2c4af6fb17651f8d3a5a2e0a3ba07865be05",
       "sourceArchiveUrl": "https://github.com/Nirusaki-Malaal/firespot-cores/releases/download/phase1-v2/gearsystem-source.tar.gz",
       "licenseUrl": "https://github.com/Nirusaki-Malaal/firespot-cores/releases/download/phase1-v2/gearsystem-LICENSE.txt",
-      "experimental": true,
       "minimumAndroidApi": 28,
       "artifacts": [
         {

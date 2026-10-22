@@ -20,7 +20,7 @@ adb -s YOUR_SERIAL shell am start -n com.fireemu/com.fireemu.MainActivity
 
 Release APKs have a separate stable distribution signing key. Earlier debug APKs may have a different certificate. Android will reject an in-place update with a mismatched certificate. Preserve any needed data before deliberately uninstalling a debug build; `adb uninstall` removes its private saves. Standard and bundled Game Boy builds also use different application IDs.
 
-An Amazon virtual-device session can accept the bundled Game Boy APK without a separate ROM/core upload. Amazon remote-session authentication and temporary ADB connectivity are separate from FireSpot's unauthenticated public game downloads. See AWS_TESTING_SETUP.md and PHASE_0.md for setup details. Never put AWS credentials into the APK.
+An Amazon virtual-device session can be used to install and inspect the Android APK. Amazon remote-session authentication and temporary ADB connectivity are separate from FireSpot's public game downloads. See AWS_TESTING_SETUP.md and CONSOLE_SMOKE_TEST_PLAN.md for setup and test steps. Never put AWS credentials into the APK.
 
 ## First play
 

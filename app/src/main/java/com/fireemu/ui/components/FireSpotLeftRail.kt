@@ -2,7 +2,6 @@ package com.fireemu.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
@@ -28,6 +27,5 @@ fun FireSpotLeftRail(selectedTab:LeftRailTab,onTabSelected:(LeftRailTab)->Unit,m
                 }
             }
         }
-        Text("P0",color=FireSpotTextSubtitle,fontSize=10.sp,letterSpacing=2.sp)
     }
 }

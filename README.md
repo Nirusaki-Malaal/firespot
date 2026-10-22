@@ -1,6 +1,6 @@
 # FireSpot
 
-**A retro game console interface for Fire OS.** FireSpot brings a clean TV library, on-demand console support, original homebrew, game imports, and remote, controller, and keyboard input into one app.
+**Built for Fire OS first.** FireSpot is a TV-first retro gaming app designed around Fire TV navigation, with a clean library, on-demand console support, original homebrew, game imports, and remote, controller, and keyboard input.
 
 ## Screenshots
 
@@ -41,7 +41,7 @@ JDK 17, Android SDK 34, and NDK 28.2.13676358:
 ./gradlew :app:assembleStandardDebug
 ```
 
-[Development guide](docs/DOCUMENTATION.md) · [Library sources](docs/LIBRARY_SOURCES.md) · [CI and signed releases](docs/CI_CD.md) · [Hackathon notes](docs/HACKATHON.md)
+[Project story](docs/PROJECT_STORY.md) · [Development guide](docs/DOCUMENTATION.md) · [Library sources](docs/LIBRARY_SOURCES.md) · [CI and signed releases](docs/CI_CD.md) · [Hackathon notes](docs/HACKATHON.md)
 
 ## License
 

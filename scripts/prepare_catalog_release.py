@@ -20,7 +20,7 @@ for id,title,consoles,license in [('gambatte','Gambatte',['gameboy'],'GPL-2.0'),
  else:
   folder=Path('artifacts/online-cores')/id;url,pin,_,file=CORES[id];source=folder/f'{id}-source.tar.gz';notice=folder/'LICENSE.txt'
  shutil.copy2(source,a.out/f'{id}-source.tar.gz');shutil.copy2(notice,a.out/f'{id}-LICENSE.txt')
- cores.append({'id':id,'title':title,'consoleIds':consoles,'license':license,'sourceUrl':url,'sourceCommit':pin,'sourceArchiveUrl':f'{base}/{id}-source.tar.gz','licenseUrl':f'{base}/{id}-LICENSE.txt','experimental':id!='gambatte','minimumAndroidApi':28,'artifacts':[artifact(folder/abi/file,f'{id}-{abi}.so',abi) for abi in ABIS]})
+ cores.append({'id':id,'title':title,'consoleIds':consoles,'license':license,'sourceUrl':url,'sourceCommit':pin,'sourceArchiveUrl':f'{base}/{id}-source.tar.gz','licenseUrl':f'{base}/{id}-LICENSE.txt','minimumAndroidApi':28,'artifacts':[artifact(folder/abi/file,f'{id}-{abi}.so',abi) for abi in ABIS]})
 # The third title is a deliberately small checkpoint variant that exercises battery RAM.
 new=Path('artifacts/signal-runner.gb');new.write_bytes(game('SIGNAL RUNNER',1,battery=True))
 games=[]

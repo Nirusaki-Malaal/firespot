@@ -16,7 +16,7 @@ The [phase1-v2 release](https://github.com/Nirusaki-Malaal/firespot-cores/releas
 | Master System | Gearsystem | Actual-title video/audio/save/reset and diagnostic input response exercised on local Android; target-device checks pending |
 | Game Gear | Gearsystem | Diagnostic video/audio/input/save/reset passed; actual Hermano test rendered and saved, but emitted no nonzero audio samples and no scripted visible input response |
 | SG-1000 | Gearsystem | Actual-title video/audio/save/reset and diagnostic input response exercised on local Android; target-device checks pending |
-| PlayStation | PCSX ReARMed | Actual-title video/audio/save/restore/reset exercised on local Android; scripted visible input response and target-device tests pending |
+| PlayStation | PCSX ReARMed | Core initialization, audio callbacks, save/restore and reset exercised. The local test image reached its menu, but gameplay remained black/loading after selection; playable in-app gameplay is not confirmed |
 
 Gambatte is included in the bundled Game Boy build. Standard downloads console support. The public release includes each core's exact source archive, commit and license. No BIOS or commercial ROMs are supplied.
 

@@ -30,5 +30,4 @@ done
 cp "$WORK/source/COPYING" "$OUT/COPYING"
 git -C "$WORK/source" archive --format=tar.gz --prefix=gambatte/ "$PIN" > "$OUT/gambatte-source.tar.gz"
 python3 "$ROOT/scripts/verify_artifacts.py" --cores "$OUT" --write-manifest
-cp "$OUT/manifest.json" "$ROOT/app/src/debug/assets/phase0-core-manifest.json"
 printf 'Core artifacts and corresponding source: %s\n' "$OUT"
