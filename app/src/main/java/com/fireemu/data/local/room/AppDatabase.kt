@@ -19,7 +19,7 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "fireemu.db"
-                ).fallbackToDestructiveMigration()
+                ).enableMultiInstanceInvalidation()
                  .build()
                 INSTANCE = instance
                 instance

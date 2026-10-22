@@ -1,9 +1,9 @@
 package com.fireemu.domain.models
 
 enum class VideoScaling(val id: Int, val label: String) {
-    ASPECT_RATIO(0, "4:3 / Core Aspect"),
-    INTEGER_SCALE(1, "Pixel Perfect (Integer)"),
-    STRETCH_FULLSCREEN(2, "Stretch to 16:9")
+    ASPECT_RATIO(0, "Original aspect"),
+    INTEGER_SCALE(1, "Integer scale"),
+    STRETCH_FULLSCREEN(2, "Fill screen")
 }
 
 data class AppSettings(

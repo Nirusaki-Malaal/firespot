@@ -41,6 +41,8 @@ class FireEmuApp : Application(), ImageLoaderFactory {
     val settingsRepository: SettingsRepository by lazy { SettingsRepositoryImpl(this, settingsStore) }
     val saveStateRepository: SaveStateRepository by lazy { SaveStateRepositoryImpl(this) }
 
+    val downloads: com.fireemu.data.catalog.DownloadRepository by lazy { com.fireemu.data.catalog.DownloadRepository(this, gameRepository) }
+
     // Use Cases
     val scanRomsUseCase: ScanRomsUseCase by lazy {
         ScanRomsUseCase(gameRepository, settingsRepository, romScanner)
@@ -60,6 +62,8 @@ class FireEmuApp : Application(), ImageLoaderFactory {
     val settingsUseCase: SettingsUseCase by lazy {
         SettingsUseCase(settingsRepository)
     }
+
+    suspend fun prepareStarterGames() { com.fireemu.data.repository.installStarterGames(this, gameRepository) }
 
     override fun onCreate() {
         super.onCreate()
@@ -85,7 +89,7 @@ class FireEmuApp : Application(), ImageLoaderFactory {
                     .build()
             }
             .respectCacheHeaders(false)
-            .crossfade(true)
+            .crossfade(false)
             .build()
     }
 }

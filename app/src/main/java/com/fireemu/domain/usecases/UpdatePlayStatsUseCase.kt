@@ -6,6 +6,6 @@ class UpdatePlayStatsUseCase(
     private val gameRepository: GameRepository
 ) {
     suspend operator fun invoke(gameId: Long, sessionDurationSeconds: Long) {
-        gameRepository.recordGamePlayed(gameId, sessionDurationSeconds)
+        gameRepository.updatePlayStats(gameId, sessionDurationSeconds)
     }
 }

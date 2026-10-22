@@ -13,6 +13,7 @@ sealed class Screen(val route: String) {
     object Details : Screen("details/{gameId}") {
         fun createRoute(gameId: Long) = "details/$gameId"
     }
+    object Discover : Screen("discover")
     object Search : Screen("search")
     object Settings : Screen("settings")
     object ControllerMapping : Screen("controller_mapping")

@@ -54,6 +54,7 @@ fun FireEmuNavGraph(
             putExtra(EmulatorActivity.EXTRA_ROM_PATH, game.romPath)
             putExtra(EmulatorActivity.EXTRA_GAME_ID, game.id)
             putExtra(EmulatorActivity.EXTRA_GAME_TITLE, game.cleanTitle)
+            putExtra(EmulatorActivity.EXTRA_RESUME, resumeState)
         }
         context.startActivity(intent)
     }
@@ -62,8 +63,8 @@ fun FireEmuNavGraph(
         when (tab) {
             LeftRailTab.HOME -> navController.navigate(Screen.Home.route)
             LeftRailTab.LIBRARY -> navController.navigate(Screen.Games.route)
-            LeftRailTab.CONSOLES -> navController.navigate(Screen.Consoles.route)
-            LeftRailTab.GAMES -> navController.navigate(Screen.Games.route)
+            LeftRailTab.CONSOLES -> navController.navigate(Screen.Library.createRoute("gameboy"))
+            LeftRailTab.GAMES -> navController.navigate(Screen.Favorites.route)
             LeftRailTab.SETTINGS -> navController.navigate(Screen.Settings.route)
         }
     }
@@ -80,7 +81,11 @@ fun FireEmuNavGraph(
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Splash.route
+        startDestination = Screen.Splash.route,
+        enterTransition = { androidx.compose.animation.EnterTransition.None },
+        exitTransition = { androidx.compose.animation.ExitTransition.None },
+        popEnterTransition = { androidx.compose.animation.EnterTransition.None },
+        popExitTransition = { androidx.compose.animation.ExitTransition.None }
     ) {
         // 1. Splash Screen
         composable(Screen.Splash.route) {
@@ -123,6 +128,7 @@ fun FireEmuNavGraph(
                 onSelectGame = { gameId ->
                     navController.navigate(Screen.Details.createRoute(gameId))
                 },
+                onOpenDiscover = { navController.navigate(Screen.Discover.route) },
                 onOpenSearch = {
                     navController.navigate(Screen.Search.route)
                 },
@@ -154,9 +160,9 @@ fun FireEmuNavGraph(
             val viewModel = remember { HomeViewModel(app.getGamesUseCase) }
             val uiState by viewModel.uiState.collectAsState()
             FilteredGridScreen(
-                title = "All Games Library",
-                subtitle = "Complete Catalog A-Z",
-                activeRailTab = LeftRailTab.GAMES,
+                title = "Your library",
+                subtitle = "Installed games. Ready when you are.",
+                activeRailTab = LeftRailTab.LIBRARY,
                 games = uiState.allGames,
                 onSelectGame = { navController.navigate(Screen.Details.createRoute(it)) },
                 onSelectRailTab = { handleRailNavigation(it) }
@@ -169,9 +175,9 @@ fun FireEmuNavGraph(
             val viewModel = remember { HomeViewModel(app.getGamesUseCase) }
             val uiState by viewModel.uiState.collectAsState()
             FilteredGridScreen(
-                title = "Favorite Games",
+                title = "Favorites",
                 subtitle = "Saved Titles",
-                activeRailTab = LeftRailTab.HOME,
+                activeRailTab = LeftRailTab.GAMES,
                 games = uiState.favoriteGames,
                 onSelectGame = { navController.navigate(Screen.Details.createRoute(it)) },
                 onSelectRailTab = { handleRailNavigation(it) },
@@ -231,6 +237,13 @@ fun FireEmuNavGraph(
             )
         }
 
+        composable(Screen.Discover.route) {
+            com.fireemu.ui.screens.discover.DiscoverScreen(
+                onOpenGame = {navController.navigate(Screen.Details.createRoute(it))},
+                onBack = {navController.popBackStack()}
+            )
+        }
+
         // 10. Settings Screen
         composable(Screen.Settings.route) {
             val viewModel = remember {
@@ -241,6 +254,7 @@ fun FireEmuNavGraph(
             }
             SettingsScreen(
                 viewModel = viewModel,
+                onOpenDiscover = {navController.navigate(Screen.Discover.route)},
                 onNavigateMapping = {
                     navController.navigate(Screen.ControllerMapping.route)
                 },

@@ -36,12 +36,12 @@ class GameDetailsViewModel(
         loadGame()
     }
 
-    private fun loadGame() {
+    fun loadGame() {
         viewModelScope.launch {
             val game = gameRepository.getGameById(gameId)
             if (game != null) {
-                val states = saveStateUseCase.getSaveStatesForGame(game.id)
-                val hasAutoOrSlot = states.any { it.exists }
+                val states = saveStateUseCase.getStates(game)
+                val hasAutoOrSlot = saveStateUseCase.hasAutoSave(game)
                 val related = gameRepository.getGamesForConsole(game.consoleId).firstOrNull()
                     ?.filter { it.id != game.id }
                     ?.take(8) ?: emptyList()

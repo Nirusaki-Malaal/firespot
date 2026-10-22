@@ -6,6 +6,6 @@ class ToggleFavoriteUseCase(
     private val gameRepository: GameRepository
 ) {
     suspend operator fun invoke(gameId: Long, isFavorite: Boolean) {
-        gameRepository.setFavorite(gameId, isFavorite)
+        gameRepository.updateFavorite(gameId, isFavorite)
     }
 }
