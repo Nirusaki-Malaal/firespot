@@ -1,0 +1,15 @@
+.gradle/
+.tooling/
+.gradle-tmp
+local.properties
+**/build/
+**/.cxx/
+**/jniLibs/
+*.apk
+*.aab
+*.so
+*.keystore
+*.key
+roms/
+artifacts/
+__pycache__/
