@@ -51,7 +51,7 @@ fun ControllerMappingScreen(
     onNavigateBack: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
-    val bindings = state.bindings.filterKeys { it in listOf(com.fireemu.domain.models.RetroButton.A, com.fireemu.domain.models.RetroButton.B, com.fireemu.domain.models.RetroButton.SELECT, com.fireemu.domain.models.RetroButton.START, com.fireemu.domain.models.RetroButton.UP, com.fireemu.domain.models.RetroButton.DOWN, com.fireemu.domain.models.RetroButton.LEFT, com.fireemu.domain.models.RetroButton.RIGHT) }.map { (button, code) -> KeyBinding(button, code) }
+    val bindings = state.bindings.filterKeys { it in listOf(com.fireemu.domain.models.RetroButton.A, com.fireemu.domain.models.RetroButton.B, com.fireemu.domain.models.RetroButton.X, com.fireemu.domain.models.RetroButton.Y, com.fireemu.domain.models.RetroButton.L, com.fireemu.domain.models.RetroButton.R, com.fireemu.domain.models.RetroButton.SELECT, com.fireemu.domain.models.RetroButton.START, com.fireemu.domain.models.RetroButton.UP, com.fireemu.domain.models.RetroButton.DOWN, com.fireemu.domain.models.RetroButton.LEFT, com.fireemu.domain.models.RetroButton.RIGHT) }.map { (button, code) -> KeyBinding(button, code) }
     val listeningAction = state.listeningForButton
 
     Box(

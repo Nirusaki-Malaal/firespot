@@ -228,7 +228,7 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback, android.hardware.in
         container.addView(btnExit)
         container.addView(createOverlayButton("Controls guide") {
             android.app.AlertDialog.Builder(this).setTitle("Game controls")
-                .setMessage("D-pad: move\nSelect: A\nPlay/Pause: B\nFast Forward / gamepad Start: Start\nRewind / gamepad Select: Select\nMenu / Back: pause\nKeyboard: arrows / WASD move; Z / J = A; X / K = B; Enter = Start; Right Shift = Select; Escape = pause.\nSaved remaps apply to gameplay. System Menu and Back remain reserved.")
+                .setMessage("D-pad: move\nSelect: A\nPlay/Pause: B\nFast Forward / gamepad Start: Start\nRewind / gamepad Select: Select\nMenu / Back: pause\nKeyboard: arrows / WASD move; Z / J = A; X / K = B; Enter = Start; Right Shift = Select; Escape = pause; C/V = X/Y; Q/E = L/R.\nSaved remaps apply to gameplay. System Menu and Back remain reserved.")
                 .setPositiveButton("Back", null).show()
         })
         container.addView(btnSlotSelector)

@@ -12,6 +12,17 @@ import com.fireemu.ui.navigation.FireEmuNavGraph
 import com.fireemu.ui.theme.FireSpotTheme
 
 class MainActivity : ComponentActivity() {
+    // Focused Compose controls handle Escape in the preview layer. These fallbacks
+    // cover freshly opened screens that have not acquired a keyboard focus yet.
+    override fun onKeyDown(keyCode:Int,event:android.view.KeyEvent):Boolean {
+        if(keyCode==android.view.KeyEvent.KEYCODE_ESCAPE)return true
+        return super.onKeyDown(keyCode,event)
+    }
+    override fun onKeyUp(keyCode:Int,event:android.view.KeyEvent):Boolean {
+        if(keyCode==android.view.KeyEvent.KEYCODE_ESCAPE) {onBackPressedDispatcher.onBackPressed();return true}
+        return super.onKeyUp(keyCode,event)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
