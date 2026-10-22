@@ -17,5 +17,7 @@ sealed class Screen(val route: String) {
     object Search : Screen("search")
     object Settings : Screen("settings")
     object ControllerMapping : Screen("controller_mapping")
+    object InputDoctor : Screen("input_doctor")
+    object Storage : Screen("storage")
     object Onboarding : Screen("onboarding")
 }

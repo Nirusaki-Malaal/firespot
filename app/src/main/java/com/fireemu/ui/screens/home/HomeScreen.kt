@@ -51,8 +51,12 @@ fun HomeScreen(viewModel:HomeViewModel,onSelectConsole:(String)->Unit,onSelectGa
             if(state.favoriteGames.isNotEmpty()) item("favorites") {GameShelf("Favorites",state.favoriteGames,onSelectGame)}
             item("console") {
                 Column(Modifier.padding(horizontal=32.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
-                    Text("YOUR SYSTEM",color=FireSpotSectionLabel,fontSize=10.sp,letterSpacing=2.sp)
-                    MockupConsoleCard(ConsoleType.GAMEBOY,state.consoleCounts["gameboy"]?:0,{onSelectConsole("gameboy")})
+                    Text("YOUR SYSTEMS",color=FireSpotSectionLabel,fontSize=10.sp,letterSpacing=2.sp)
+                    LazyRow(horizontalArrangement=Arrangement.spacedBy(12.dp)) {
+                        items(state.consoleCounts.keys.sorted(),key={it}) { id ->
+                            MockupConsoleCard(ConsoleType.fromId(id),state.consoleCounts[id]?:0,{onSelectConsole(id)})
+                        }
+                    }
                 }
             }
         }

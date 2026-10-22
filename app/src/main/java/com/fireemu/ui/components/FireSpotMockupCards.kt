@@ -14,6 +14,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import coil.compose.AsyncImage
+import androidx.compose.ui.platform.LocalContext
+import coil.request.ImageRequest
 import com.fireemu.domain.models.*
 import com.fireemu.ui.theme.*
 
@@ -26,7 +28,7 @@ fun MockupConsoleCard(console:ConsoleType,titleCount:Int,onClick:()->Unit,modifi
                 Text(console.shortName,color=FireSpotTextPrimary,fontSize=17.sp,fontWeight=FontWeight.Medium)
                 Text("$titleCount ${if(titleCount==1) "game" else "games"} in your library",color=FireSpotTextSecondary,fontSize=12.sp)
             }
-            Text("01",color=FireSpotTextSubtitle,fontSize=11.sp)
+            FireSpotIcon("arrow",Modifier.size(16.dp),tint=FireSpotTextSubtitle)
         }
     }
 }
@@ -35,7 +37,7 @@ fun MockupContinuePlayingCard(game:Game,isMostRecentOrHasState:Boolean=true,onCl
     TvFocusableCard(onClick,modifier.width(234.dp).height(192.dp)) { focused ->
         Column {
             Box(Modifier.fillMaxWidth().height(126.dp)) {
-                if(!game.coverArtPath.isNullOrEmpty()) AsyncImage(model=game.coverArtPath,contentDescription=null,contentScale=ContentScale.Crop,colorFilter=ColorFilter.colorMatrix(ColorMatrix().apply {setToSaturation(0f)}),modifier=Modifier.fillMaxSize())
+                if(!game.coverArtPath.isNullOrEmpty()) AsyncImage(model=ImageRequest.Builder(LocalContext.current).data(game.coverArtPath).size(480,320).allowRgb565(true).build(),contentDescription=null,contentScale=ContentScale.Crop,colorFilter=ColorFilter.colorMatrix(ColorMatrix().apply {setToSaturation(0f)}),modifier=Modifier.fillMaxSize())
                 else FallbackCover(game,Modifier.fillMaxSize())
                 if(isMostRecentOrHasState && game.lastPlayedTimestamp>0) Text("RECENTLY PLAYED",color=FireSpotTextPrimary,fontSize=9.sp,letterSpacing=1.sp,modifier=Modifier.align(Alignment.TopStart).padding(12.dp))
             }

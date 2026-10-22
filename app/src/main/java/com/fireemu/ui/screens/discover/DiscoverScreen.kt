@@ -6,6 +6,8 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -20,9 +22,10 @@ import com.fireemu.ui.components.*
 import com.fireemu.ui.theme.*
 import kotlinx.coroutines.*
 
-/** Native console-first catalog: actual counts and permissions, no embedded ROM-site WebView. */
+/** Native catalog stays lightweight; the external provider opens only on request. */
 @Composable
 fun DiscoverScreen(onOpenGame:(Long)->Unit,onImportGame:()->Unit,onBack:()->Unit) {
+    val context=LocalContext.current
     val app=FireEmuApp.instance
     val repo=app.downloads
     val catalog by repo.catalog.collectAsState()
@@ -67,9 +70,12 @@ fun DiscoverScreen(onOpenGame:(Long)->Unit,onImportGame:()->Unit,onBack:()->Unit
         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
             Column {
                 Text("Discover & play",color=FireSpotTextPrimary,fontSize=30.sp)
-                Text("Browse by console. Get an original game. Keep it in your library.",color=FireSpotTextSecondary,fontSize=12.sp)
+                Text("Your next game starts here. Browse, download, play.",color=FireSpotTextSecondary,fontSize=12.sp)
             }
-            HeaderPillButton("back","Back",onBack)
+            Row(horizontalArrangement=Arrangement.spacedBy(10.dp)) {
+                HeaderPillButton("library","ROMsGames library",{context.startActivity(Intent(context,com.fireemu.ui.screens.browser.GameBrowserActivity::class.java))})
+                HeaderPillButton("back","Back",onBack)
+            }
         }
         Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
             for(label in listOf("Games","Consoles","Installed","Console support")) TvButton(label,{tab=label},if(label=="Games") Modifier.focusRequester(firstFocus) else Modifier,isPrimary=tab==label)

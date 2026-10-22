@@ -1,6 +1,8 @@
 package com.fireemu.ui.screens.details
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
@@ -48,7 +50,7 @@ fun GameDetailsSheet(viewModel:GameDetailsViewModel,onLaunchGame:(Game,Boolean)-
     val firstFocus=remember {FocusRequester()}
     LaunchedEffect(game.id) {firstFocus.requestFocus()}
     Row(Modifier.fillMaxSize().etchedBackdrop()) {
-        Column(Modifier.weight(1f).padding(32.dp),verticalArrangement=Arrangement.spacedBy(24.dp)) {
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(32.dp),verticalArrangement=Arrangement.spacedBy(24.dp)) {
             HeaderPillButton("back","Library",onNavigateBack)
             Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(32.dp)) {
                 TvFocusableCard(onClick={prepare(false)},modifier=Modifier.width(270.dp).height(250.dp)) {
@@ -57,7 +59,7 @@ fun GameDetailsSheet(viewModel:GameDetailsViewModel,onLaunchGame:(Game,Boolean)-
                 Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(16.dp)) {
                     Text("THE COLLECTION  /  ${game.console.shortName}",color=FireSpotTextSubtitle,fontSize=10.sp,letterSpacing=1.5.sp)
                     Text(game.cleanTitle,color=FireSpotTextPrimary,fontSize=34.sp,lineHeight=38.sp,fontWeight=FontWeight.Light)
-                    Text("1 PLAYER  /  ${game.releaseYear}  /  ${game.formattedPlayTime}",color=FireSpotTextSecondary,fontSize=11.sp)
+                    Text("${game.maxPlayers} PLAYER${if(game.maxPlayers==1) "" else "S"}  /  ${if(game.releaseYear>0) game.releaseYear.toString() else "LOCAL"}  /  ${game.formattedPlayTime}",color=FireSpotTextSecondary,fontSize=11.sp)
                     Text(game.description,color=FireSpotTextSecondary,fontSize=13.sp,lineHeight=20.sp,maxLines=4)
                     Row(horizontalArrangement=Arrangement.spacedBy(12.dp)) {
                         TvButton(if(preparing) "Preparing…" else "Play from start",{prepare(false)},Modifier.focusRequester(firstFocus),enabled=!preparing,isPrimary=true)

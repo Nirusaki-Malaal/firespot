@@ -70,16 +70,21 @@ class FireEmuApp : Application(), ImageLoaderFactory {
         instance = this
     }
 
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        if (level >= TRIM_MEMORY_UI_HIDDEN) coil.Coil.imageLoader(this).memoryCache?.clear()
+    }
+
     /**
      * Configures Coil for low-memory Fire OS hardware:
-     * Memory cache is limited to max 15% of available heap.
+     * Memory cache is limited to 8% of available heap, capped at 16 MiB.
      * Disk cache is capped at 50 MB.
      */
     override fun newImageLoader(): ImageLoader {
         return ImageLoader.Builder(this)
             .memoryCache {
                 MemoryCache.Builder(this)
-                    .maxSizePercent(0.15)
+                    .maxSizeBytes(minOf((Runtime.getRuntime().maxMemory() * 0.08).toInt(), 16 * 1024 * 1024))
                     .build()
             }
             .diskCache {

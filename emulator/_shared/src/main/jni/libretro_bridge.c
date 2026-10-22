@@ -159,13 +159,16 @@ static bool core_environ_cb(unsigned cmd, void *data) {
 }
 
 static int g_scaling_mode = 0;
+/* Reuse horizontal mapping; expand each source row once, copy repeated scaled rows. */
+static unsigned g_x_map[8192];
+static unsigned g_map_source_width = 0;
+static int g_map_target_width = 0;
 static void core_video_refresh_cb(const void *data, unsigned width, unsigned height, size_t pitch) {
     if (!g_native_window || !data || width == 0 || height == 0) return;
     ANativeWindow_Buffer buffer;
     if (ANativeWindow_lock(g_native_window, &buffer, NULL) < 0) return;
     if (!buffer.bits || buffer.width <= 0 || buffer.height <= 0) { ANativeWindow_unlockAndPost(g_native_window); return; }
     uint32_t *dst = buffer.bits;
-    memset(dst, 0, (size_t)buffer.stride * buffer.height * 4);
     int rw = buffer.width, rh = buffer.height;
     if (g_scaling_mode != 2) {
         double sx = (double)buffer.width / width, sy = (double)buffer.height / height;
@@ -174,20 +177,38 @@ static void core_video_refresh_cb(const void *data, unsigned width, unsigned hei
         rw = (int)(width * scale); rh = (int)(height * scale);
     }
     int ox = (buffer.width-rw)/2, oy = (buffer.height-rh)/2;
+    if (rw <= 0 || rh <= 0 || rw > 8192) { ANativeWindow_unlockAndPost(g_native_window); return; }
+    if (g_map_source_width != width || g_map_target_width != rw) {
+        for (int x=0; x<rw; x++) g_x_map[x] = (unsigned)((size_t)x * width / rw);
+        g_map_source_width=width; g_map_target_width=rw;
+    }
+    if (oy > 0) memset(dst, 0, (size_t)buffer.stride * oy * 4);
+    if (oy+rh < buffer.height) memset(dst+(oy+rh)*buffer.stride, 0, (size_t)(buffer.height-oy-rh)*buffer.stride*4);
+    unsigned previous_source_y = height;
     for (int y=0; y<rh; y++) {
-        const uint8_t *row = (const uint8_t*)data + ((size_t)y * height / rh) * pitch;
+        unsigned source_y=(unsigned)((size_t)y * height / rh);
+        uint32_t *target=dst+(oy+y)*buffer.stride;
+        if (ox > 0) memset(target,0,(size_t)ox*4);
+        if (ox+rw < buffer.stride) memset(target+ox+rw,0,(size_t)(buffer.stride-ox-rw)*4);
+        target+=ox;
+        if (source_y == previous_source_y) {
+            memcpy(target,target-buffer.stride,(size_t)rw*4);
+            continue;
+        }
+        const uint8_t *row=(const uint8_t*)data + source_y*pitch;
         for (int x=0; x<rw; x++) {
-            unsigned px = (unsigned)((size_t)x * width / rw);
+            unsigned px=g_x_map[x];
             uint32_t r,g,b;
             if (g_pixel_format == RETRO_PIXEL_FORMAT_XRGB8888) {
-                uint32_t v = ((const uint32_t*)row)[px]; r=(v>>16)&255;g=(v>>8)&255;b=v&255;
+                uint32_t v=((const uint32_t*)row)[px];r=(v>>16)&255;g=(v>>8)&255;b=v&255;
             } else {
                 uint16_t v=((const uint16_t*)row)[px];
                 if (g_pixel_format == RETRO_PIXEL_FORMAT_RGB565) {r=((v>>11)&31)*255/31;g=((v>>5)&63)*255/63;b=(v&31)*255/31;}
                 else {r=((v>>10)&31)*255/31;g=((v>>5)&31)*255/31;b=(v&31)*255/31;}
             }
-            dst[(oy+y)*buffer.stride+ox+x] = 0xFF000000 | (b<<16) | (g<<8) | r;
+            target[x]=0xFF000000 | (b<<16) | (g<<8) | r;
         }
+        previous_source_y=source_y;
     }
     ANativeWindow_unlockAndPost(g_native_window);
 }

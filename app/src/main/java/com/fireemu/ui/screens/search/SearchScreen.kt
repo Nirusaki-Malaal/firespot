@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import com.fireemu.ui.components.etchedBackdrop
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.draw.clip
@@ -66,7 +67,7 @@ fun SearchScreen(
                     true
                 } else false
             }
-            .background(FireSpotBackgroundGradient)
+            .etchedBackdrop()
             .padding(horizontal = 48.dp, vertical = 27.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -87,7 +88,7 @@ fun SearchScreen(
                         text = "Search Library",
                         color = FireSpotTextPrimary,
                         fontSize = 26.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Light
                     )
                     Spacer(modifier = Modifier.width(20.dp))
                     Box(

@@ -60,6 +60,10 @@
             android:launchMode="singleTask"
             android:exported="false" />
 
+        <activity android:name=".ui.screens.browser.GameBrowserActivity"
+            android:screenOrientation="landscape" android:exported="false"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize" />
+
         <!-- Licenses & Diagnostics Activity -->
         <activity
             android:name=".ui.screens.settings.LicensesActivity"

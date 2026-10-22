@@ -12,13 +12,22 @@ import com.fireemu.ui.navigation.FireEmuNavGraph
 import com.fireemu.ui.theme.FireSpotTheme
 
 class MainActivity : ComponentActivity() {
+    var inputInspector: ((android.view.InputEvent) -> Boolean)? = null
+
+    override fun dispatchGenericMotionEvent(event: android.view.MotionEvent): Boolean {
+        if (inputInspector?.invoke(event) == true) return true
+        return super.dispatchGenericMotionEvent(event)
+    }
+
     // Focused Compose controls handle Escape in the preview layer. These fallbacks
     // cover freshly opened screens that have not acquired a keyboard focus yet.
     override fun onKeyDown(keyCode:Int,event:android.view.KeyEvent):Boolean {
+        if (inputInspector?.invoke(event) == true) return true
         if(keyCode==android.view.KeyEvent.KEYCODE_ESCAPE)return true
         return super.onKeyDown(keyCode,event)
     }
     override fun onKeyUp(keyCode:Int,event:android.view.KeyEvent):Boolean {
+        if (inputInspector?.invoke(event) == true) return true
         if(keyCode==android.view.KeyEvent.KEYCODE_ESCAPE) {onBackPressedDispatcher.onBackPressed();return true}
         return super.onKeyUp(keyCode,event)
     }
@@ -30,7 +39,8 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 Box(Modifier.fillMaxSize().onPreviewKeyEvent { event ->
                     val key=event.nativeKeyEvent
-                    if(key.keyCode==android.view.KeyEvent.KEYCODE_ESCAPE) {
+                    if(inputInspector?.invoke(key)==true) true
+                    else if(key.keyCode==android.view.KeyEvent.KEYCODE_ESCAPE) {
                         if(key.action==android.view.KeyEvent.ACTION_UP) onBackPressedDispatcher.onBackPressed()
                         true
                     } else false

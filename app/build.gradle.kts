@@ -93,6 +93,7 @@ android {
     }
 
     sourceSets {
+        getByName("androidTest").assets.srcDir("../artifacts/android-test-assets")
         getByName("main") {
             jniLibs.srcDirs("src/main/jniLibs")
         }
@@ -115,6 +116,8 @@ android {
 
 dependencies {
     testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test:runner:1.5.2")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
     // AndroidX Core & Lifecycle
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")

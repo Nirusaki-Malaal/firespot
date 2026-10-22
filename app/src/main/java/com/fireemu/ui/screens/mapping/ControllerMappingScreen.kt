@@ -27,6 +27,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import com.fireemu.ui.components.etchedBackdrop
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.draw.clip
@@ -64,7 +65,7 @@ fun ControllerMappingScreen(
                     true
                 } else state.listeningForButton != null
             }
-            .background(FireSpotBackgroundGradient)
+            .etchedBackdrop()
             .padding(horizontal = 48.dp, vertical = 27.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -77,7 +78,7 @@ fun ControllerMappingScreen(
                     text = "Controller & Remote Mapping",
                     color = FireSpotTextPrimary,
                     fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Light
                 )
 
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -151,7 +152,7 @@ fun MockupBindingRow(
                 text = if (isListening) "PRESS BUTTON NOW..." else android.view.KeyEvent.keyCodeToString(binding.primaryKeyCode),
                 color = Color.White,
                 fontSize = 13.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Light
             )
         }
     }

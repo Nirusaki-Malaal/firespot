@@ -59,13 +59,20 @@ fun FireEmuNavGraph(
         context.startActivity(intent)
     }
 
+    fun railRoute(route: String) {
+        navController.navigate(route) {
+            popUpTo(Screen.Home.route) { saveState = true }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
     fun handleRailNavigation(tab: LeftRailTab) {
         when (tab) {
-            LeftRailTab.HOME -> navController.navigate(Screen.Home.route)
-            LeftRailTab.LIBRARY -> navController.navigate(Screen.Games.route)
-            LeftRailTab.CONSOLES -> navController.navigate(Screen.Library.createRoute("gameboy"))
-            LeftRailTab.GAMES -> navController.navigate(Screen.Favorites.route)
-            LeftRailTab.SETTINGS -> navController.navigate(Screen.Settings.route)
+            LeftRailTab.HOME -> railRoute(Screen.Home.route)
+            LeftRailTab.LIBRARY -> railRoute(Screen.Games.route)
+            LeftRailTab.CONSOLES -> railRoute(Screen.Discover.route)
+            LeftRailTab.GAMES -> railRoute(Screen.Favorites.route)
+            LeftRailTab.SETTINGS -> railRoute(Screen.Settings.route)
         }
     }
 
@@ -89,7 +96,7 @@ fun FireEmuNavGraph(
     ) {
         // 1. Splash Screen
         composable(Screen.Splash.route) {
-            val viewModel = remember { SplashViewModel(app.settingsRepository) }
+            val viewModel = screenViewModel { SplashViewModel(app.settingsRepository) }
             SplashScreen(
                 viewModel = viewModel,
                 onNavigate = { target ->
@@ -102,7 +109,7 @@ fun FireEmuNavGraph(
 
         // 2. Onboarding Screen
         composable(Screen.Onboarding.route) {
-            val viewModel = remember { OnboardingViewModel(app.settingsRepository, app.scanRomsUseCase) }
+            val viewModel = screenViewModel { OnboardingViewModel(app.settingsRepository, app.scanRomsUseCase) }
             OnboardingScreen(
                 viewModel = viewModel,
                 onFinish = {
@@ -119,7 +126,7 @@ fun FireEmuNavGraph(
                 showExitDialog = true
             }
 
-            val viewModel = remember { HomeViewModel(app.getGamesUseCase) }
+            val viewModel = screenViewModel { HomeViewModel(app.getGamesUseCase) }
             HomeScreen(
                 viewModel = viewModel,
                 onSelectConsole = { consoleId ->
@@ -142,7 +149,7 @@ fun FireEmuNavGraph(
         // 4. Consoles Screen (Grid)
         composable(Screen.Consoles.route) {
             BackHandler { navController.navigate(Screen.Home.route) }
-            val viewModel = remember { HomeViewModel(app.getGamesUseCase) }
+            val viewModel = screenViewModel { HomeViewModel(app.getGamesUseCase) }
             val uiState by viewModel.uiState.collectAsState()
             FilteredGridScreen(
                 title = "All Consoles",
@@ -157,7 +164,7 @@ fun FireEmuNavGraph(
         // 5. Games Screen (All titles Grid)
         composable(Screen.Games.route) {
             BackHandler { navController.navigate(Screen.Home.route) }
-            val viewModel = remember { HomeViewModel(app.getGamesUseCase) }
+            val viewModel = screenViewModel { HomeViewModel(app.getGamesUseCase) }
             val uiState by viewModel.uiState.collectAsState()
             FilteredGridScreen(
                 title = "Your library",
@@ -172,7 +179,7 @@ fun FireEmuNavGraph(
         // 6. Favorites Screen
         composable(Screen.Favorites.route) {
             BackHandler { navController.navigate(Screen.Home.route) }
-            val viewModel = remember { HomeViewModel(app.getGamesUseCase) }
+            val viewModel = screenViewModel { HomeViewModel(app.getGamesUseCase) }
             val uiState by viewModel.uiState.collectAsState()
             FilteredGridScreen(
                 title = "Favorites",
@@ -191,7 +198,7 @@ fun FireEmuNavGraph(
             arguments = listOf(navArgument("consoleId") { type = NavType.StringType })
         ) { backStackEntry ->
             val consoleId = backStackEntry.arguments?.getString("consoleId") ?: "nes"
-            val viewModel = remember(consoleId) { LibraryViewModel(consoleId, app.getGamesUseCase) }
+            val viewModel = screenViewModel(key = "library-$consoleId") { LibraryViewModel(consoleId, app.getGamesUseCase) }
             ConsoleLibraryScreen(
                 viewModel = viewModel,
                 onSelectGame = { gameId ->
@@ -208,7 +215,7 @@ fun FireEmuNavGraph(
             arguments = listOf(navArgument("gameId") { type = NavType.LongType })
         ) { backStackEntry ->
             val gameId = backStackEntry.arguments?.getLong("gameId") ?: 0L
-            val viewModel = remember(gameId) {
+            val viewModel = screenViewModel(key = "details-$gameId") {
                 GameDetailsViewModel(
                     gameId = gameId,
                     gameRepository = app.gameRepository,
@@ -227,7 +234,7 @@ fun FireEmuNavGraph(
 
         // 9. Search Screen
         composable(Screen.Search.route) {
-            val viewModel = remember { SearchViewModel(app.getGamesUseCase) }
+            val viewModel = screenViewModel { SearchViewModel(app.getGamesUseCase) }
             SearchScreen(
                 viewModel = viewModel,
                 onSelectGame = { gameId ->
@@ -247,7 +254,7 @@ fun FireEmuNavGraph(
 
         // 10. Settings Screen
         composable(Screen.Settings.route) {
-            val viewModel = remember {
+            val viewModel = screenViewModel {
                 SettingsViewModel(
                     settingsUseCase = app.settingsUseCase,
                     scanRomsUseCase = app.scanRomsUseCase
@@ -256,6 +263,8 @@ fun FireEmuNavGraph(
             SettingsScreen(
                 viewModel = viewModel,
                 onOpenDiscover = {navController.navigate(Screen.Discover.route)},
+                onOpenInputDoctor = { navController.navigate(Screen.InputDoctor.route) },
+                onOpenStorage = { navController.navigate(Screen.Storage.route) },
                 onNavigateMapping = {
                     navController.navigate(Screen.ControllerMapping.route)
                 },
@@ -263,9 +272,16 @@ fun FireEmuNavGraph(
             )
         }
 
+        composable(Screen.InputDoctor.route) {
+            com.fireemu.ui.screens.tools.InputDoctorScreen { navController.popBackStack() }
+        }
+        composable(Screen.Storage.route) {
+            com.fireemu.ui.screens.tools.StorageScreen { navController.popBackStack() }
+        }
+
         // 11. Controller Mapping Screen
         composable(Screen.ControllerMapping.route) {
-            val viewModel = remember { MappingViewModel(app.settingsRepository) }
+            val viewModel = screenViewModel { MappingViewModel(app.settingsRepository) }
             ControllerMappingScreen(
                 viewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() }
@@ -273,3 +289,12 @@ fun FireEmuNavGraph(
         }
     }
 }
+
+/** Navigation owns each ViewModel: popping a screen cancels its collectors and jobs. */
+@Composable
+private inline fun <reified T : androidx.lifecycle.ViewModel> screenViewModel(
+    key: String? = null, crossinline create: () -> T
+): T = androidx.lifecycle.viewmodel.compose.viewModel(key = key, factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <VM : androidx.lifecycle.ViewModel> create(modelClass: Class<VM>): VM = create() as VM
+})

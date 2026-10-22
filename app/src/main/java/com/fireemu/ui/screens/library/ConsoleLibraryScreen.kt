@@ -30,6 +30,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import com.fireemu.ui.components.etchedBackdrop
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -89,7 +90,7 @@ fun ConsoleLibraryScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(FireSpotBackgroundGradient)
+            .etchedBackdrop()
             .padding(horizontal = 48.dp, vertical = 27.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -115,7 +116,7 @@ fun ConsoleLibraryScreen(
                                 text = console.displayName,
                                 color = FireSpotTextPrimary,
                                 fontSize = 28.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Light
                             )
                             Spacer(modifier = Modifier.width(14.dp))
                             Text(
