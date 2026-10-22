@@ -50,6 +50,10 @@ class MappingViewModel(
 
     fun bindKey(keyCode: Int) {
         val targetButton = _uiState.value.listeningForButton ?: return
+        if(keyCode in listOf(KeyEvent.KEYCODE_MENU, KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_HOME, KeyEvent.KEYCODE_ESCAPE, KeyEvent.KEYCODE_F1)) {
+            _uiState.value = _uiState.value.copy(statusMessage="Menu, Back, Home, Escape and F1 are reserved. Choose another button.")
+            return
+        }
         viewModelScope.launch {
             settingsRepository.saveKeyBinding(targetButton, keyCode)
             val updated = _uiState.value.bindings.toMutableMap()

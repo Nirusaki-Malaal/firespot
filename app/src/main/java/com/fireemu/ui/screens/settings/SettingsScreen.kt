@@ -1,269 +1,106 @@
 package com.fireemu.ui.screens.settings
 
-import android.content.Intent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import android.content.ActivityNotFoundException
+import android.provider.OpenableColumns
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.*
+import androidx.compose.ui.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.fireemu.domain.models.AudioResampling
-import com.fireemu.domain.models.VideoScaling
-import com.fireemu.ui.components.HeaderPillButton
-import com.fireemu.ui.theme.FireSpotAccentBlue
-import com.fireemu.ui.theme.FireSpotBackgroundGradient
-import com.fireemu.ui.theme.FireSpotGlassBorder
-import com.fireemu.ui.theme.FireSpotGlassCard
-import com.fireemu.ui.theme.FireSpotSearchFocusedBg
-import com.fireemu.ui.theme.FireSpotTextPrimary
-import com.fireemu.ui.theme.FireSpotTextSecondary
-import com.fireemu.ui.theme.FireSpotTextSubtitle
-import com.fireemu.ui.theme.FireSpotTitleCyan
-
-enum class MockupSettingsTab(val label: String, val icon: String) {
-    STORAGE("Storage & Scanner", "📁"),
-    VIDEO("Video & Scaling", "📺"),
-    AUDIO("Audio Resampling", "🔊"),
-    CONTROLLER("Controller Mapping", "🎮"),
-    ABOUT("About FireSpot", "ℹ")
-}
+import androidx.compose.ui.unit.*
+import com.fireemu.BuildConfig
+import com.fireemu.FireEmuApp
+import com.fireemu.domain.models.Game
+import com.fireemu.ui.components.*
+import com.fireemu.ui.theme.*
+import kotlinx.coroutines.*
+import java.io.File
+import java.security.MessageDigest
 
 @Composable
-fun SettingsScreen(
-    viewModel: SettingsViewModel,
-    onNavigateMapping: () -> Unit,
-    onNavigateBack: () -> Unit
-) {
+fun SettingsScreen(viewModel:SettingsViewModel,onOpenDiscover:()->Unit,onNavigateMapping:()->Unit,onNavigateBack:()->Unit) {
     val settings by viewModel.settings.collectAsState()
-    val isScanning by viewModel.isScanning.collectAsState()
-    val scanMsg by viewModel.scanMessage.collectAsState()
-    val context = LocalContext.current
-    var currentTab by remember { mutableStateOf(MockupSettingsTab.STORAGE) }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(FireSpotBackgroundGradient)
-            .padding(horizontal = 48.dp, vertical = 27.dp)
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "FireSpot Settings",
-                    color = FireSpotTextPrimary,
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold
-                )
-
-                HeaderPillButton(
-                    icon = "←",
-                    label = "Back to Home",
-                    onClick = onNavigateBack
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Two Panels: Left List + Right Glass Card
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.spacedBy(32.dp)
-            ) {
-                // Left Tabs List
-                Column(
-                    modifier = Modifier
-                        .width(260.dp)
-                        .fillMaxHeight(),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    MockupSettingsTab.values().forEach { tab ->
-                        SettingsNavTab(
-                            tab = tab,
-                            isSelected = tab == currentTab,
-                            onClick = { currentTab = tab }
-                        )
-                    }
+    val context=LocalContext.current
+    val scope=rememberCoroutineScope()
+    var message by remember {mutableStateOf<String?>(null)}
+    var importing by remember {mutableStateOf(false)}
+    val picker=rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {uri->
+        if(uri!=null) scope.launch {
+            importing=true
+            message=try {
+                withContext(Dispatchers.IO) {
+                    var name="Imported game.gb"
+                    context.contentResolver.query(uri,arrayOf(OpenableColumns.DISPLAY_NAME),null,null,null)?.use {if(it.moveToFirst()) name=it.getString(0)}
+                    val ext=name.substringAfterLast('.').lowercase()
+                    val console=when(ext) {"gb","gbc"->com.fireemu.domain.models.ConsoleType.GAMEBOY;"nes"->com.fireemu.domain.models.ConsoleType.NES;"gba"->com.fireemu.domain.models.ConsoleType.GBA;else->error("Choose a .gb, .gbc, .nes or .gba cartridge. Disc sets need a separate transfer flow.")}
+                    val maxBytes=if(console==com.fireemu.domain.models.ConsoleType.GAMEBOY) 8L*1024*1024 else 32L*1024*1024
+                    val dir=File(context.filesDir,"games/imports").apply {mkdirs()}
+                    val temp=File.createTempFile("import-",".tmp",dir)
+                    try {
+                        val digest=MessageDigest.getInstance("SHA-256")
+                        var total=0L
+                        context.contentResolver.openInputStream(uri)!!.use {input->temp.outputStream().use {output->
+                            val buf=ByteArray(65536)
+                            while(true) {val n=input.read(buf);if(n<0) break;total+=n;require(total<=maxBytes) {"This cartridge exceeds the ${maxBytes/1024/1024} MiB import limit."};digest.update(buf,0,n);output.write(buf,0,n)}
+                        }}
+                        when(console) {
+                            com.fireemu.domain.models.ConsoleType.GAMEBOY -> require(total>=32768 && total%16384==0L) {"This is not a complete Game Boy cartridge."}
+                            com.fireemu.domain.models.ConsoleType.NES -> {
+                                val header=ByteArray(16);temp.inputStream().use {check(it.read(header)==16)}
+                                require(header.take(4)==listOf<Byte>(78,69,83,26) && total>=16+(header[4].toInt() and 255)*16384L+(header[5].toInt() and 255)*8192L) {"This is not a complete iNES cartridge."}
+                            }
+                            else -> require(total>=192) {"The GBA cartridge is incomplete."}
+                        }
+                        val hash=digest.digest().joinToString("") {"%02x".format(it)}
+                        val file=File(dir,"$hash.${name.substringAfterLast('.').lowercase()}")
+                        if(!file.exists()) check(temp.renameTo(file)) {"Could not save imported game."}
+                        val repo=FireEmuApp.instance.gameRepository
+                        if(repo.getGameByPath(file.absolutePath)==null) repo.insertOrUpdateGames(listOf(Game(title=name.substringBeforeLast('.'),cleanTitle=name.substringBeforeLast('.'),romPath=file.absolutePath,consoleId=console.id,fileSizeBytes=total,genre="Imported game",releaseYear=0,maxPlayers=1,rating="",description="Your imported ${console.shortName} cartridge. D-pad moves; Select is A; Play/Pause is B. Menu opens controls and saves.")))
+                        "Added ${name.substringBeforeLast('.')} to your library."
+                    } finally {temp.delete()}
                 }
-
-                // Right Glass Panel
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(FireSpotGlassCard)
-                        .border(1.dp, FireSpotGlassBorder, RoundedCornerShape(14.dp))
-                        .padding(28.dp)
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    when (currentTab) {
-                        MockupSettingsTab.STORAGE -> {
-                            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                                Text(text = "ROM FOLDERS & SCANNER", color = FireSpotTextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                                Text(text = "Monitors local storage and USB OTG drives for game files.", color = FireSpotTextSecondary, fontSize = 14.sp)
-                                Text(text = "Paths: ${settings.romDirectories.joinToString(", ")}", color = FireSpotTitleCyan, fontSize = 14.sp)
-                                HeaderPillButton(
-                                    icon = "🔍",
-                                    label = if (isScanning) "Scanning..." else "Scan ROMs Now",
-                                    onClick = { viewModel.triggerScan() }
-                                )
-                                if (scanMsg != null) {
-                                    Text(text = scanMsg ?: "", color = FireSpotTextPrimary, fontSize = 14.sp)
-                                }
-                            }
-                        }
-                        MockupSettingsTab.VIDEO -> {
-                            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                                Text(text = "VIDEO & DISPLAY", color = FireSpotTextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(text = "Scaling: ${settings.videoScaling.label}", color = FireSpotTextPrimary, fontSize = 15.sp)
-                                    HeaderPillButton(icon = "📺", label = "Cycle Scaling", onClick = {
-                                        val next = when (settings.videoScaling) {
-                                            VideoScaling.ASPECT_RATIO -> VideoScaling.INTEGER
-                                            VideoScaling.INTEGER -> VideoScaling.STRETCH
-                                            VideoScaling.STRETCH -> VideoScaling.ASPECT_RATIO
-                                        }
-                                        viewModel.updateVideoScaling(next)
-                                    })
-                                }
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(text = "Scanlines: ${if (settings.scanlinesEnabled) "ON" else "OFF"}", color = FireSpotTextPrimary, fontSize = 15.sp)
-                                    HeaderPillButton(icon = "⚡", label = "Toggle Filter", onClick = { viewModel.toggleScanlines() })
-                                }
-                            }
-                        }
-                        MockupSettingsTab.AUDIO -> {
-                            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                                Text(text = "LOW-LATENCY AUDIO", color = FireSpotTextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(text = "Resampling: ${settings.audioResampling.label}", color = FireSpotTextPrimary, fontSize = 15.sp)
-                                    HeaderPillButton(icon = "🔊", label = "Change Resampler", onClick = {
-                                        val next = when (settings.audioResampling) {
-                                            AudioResampling.SINC_LOWER -> AudioResampling.SINC_HIGHER
-                                            AudioResampling.SINC_HIGHER -> AudioResampling.NEAREST
-                                            AudioResampling.NEAREST -> AudioResampling.SINC_LOWER
-                                        }
-                                        viewModel.updateAudioResampling(next)
-                                    })
-                                }
-                            }
-                        }
-                        MockupSettingsTab.CONTROLLER -> {
-                            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                                Text(text = "CONTROLLER MAPPING", color = FireSpotTextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                                Text(text = "Remap Alexa Voice Remote and Bluetooth gamepad buttons.", color = FireSpotTextSecondary, fontSize = 14.sp)
-                                HeaderPillButton(icon = "🎮", label = "Open Remap Screen", onClick = onNavigateMapping)
-                            }
-                        }
-                        MockupSettingsTab.ABOUT -> {
-                            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                                Text(text = "ABOUT FIRESPOT", color = FireSpotTextPrimary, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                                Text(text = "FireSpot TV Edition • Version 1.0.0", color = FireSpotTitleCyan, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                                Text(text = "Integrated Cores: FCEUmm (NES), Gambatte (GB/GBC), mGBA (GBA), PCSX ReARMed (PS1), PPSSPP (PSP).", color = FireSpotTextSecondary, fontSize = 13.sp)
-                                HeaderPillButton(
-                                    icon = "📜",
-                                    label = "View Licenses",
-                                    onClick = {
-                                        val intent = Intent(context, LicensesActivity::class.java)
-                                        context.startActivity(intent)
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
+            } catch(e:Exception) {e.message?:"Import failed. Please try again."}
+            importing=false
+        }
+    }
+    Row(Modifier.fillMaxSize().etchedBackdrop()) {
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(32.dp),verticalArrangement=Arrangement.spacedBy(20.dp)) {
+            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,verticalAlignment=Alignment.CenterVertically) {
+                Text("Make yourself at home.",color=FireSpotTextPrimary,fontSize=30.sp,fontWeight=FontWeight.Light)
+                HeaderPillButton("back","Back",onNavigateBack)
             }
+            TvButton("Discover games & console support",onOpenDiscover)
+            Text("LIBRARY",color=FireSpotTextSubtitle,fontSize=10.sp,letterSpacing=2.sp)
+            SettingsRow("Two original games, already included","Orbit Collector and Pocket Courier are original CC0 homebrew. They work offline.")
+            Row(horizontalArrangement=Arrangement.spacedBy(12.dp)) {
+                TvButton(if(importing) "Importing…" else "Import a game",{
+                    try {picker.launch(arrayOf("*/*"))} catch(_:ActivityNotFoundException) {message="This TV has no file picker. The two included games are ready to play."}
+                },enabled=!importing)
+            }
+            if(message!=null) Text(message!!,color=FireSpotTextPrimary,fontSize=13.sp)
+            Text("PLAY & DISPLAY",color=FireSpotTextSubtitle,fontSize=10.sp,letterSpacing=2.sp)
+            Row(horizontalArrangement=Arrangement.spacedBy(12.dp)) {
+                HeaderPillButton("display","Scaling: ${settings.videoScaling.label}",{viewModel.cycleScaling()})
+                HeaderPillButton("display","Frame counter: ${if(settings.showFps) "On" else "Off"}",{viewModel.toggleFps()})
+                HeaderPillButton("controller","Remap controls",onNavigateMapping)
+            }
+            Text("Keyboard: arrows or WASD move; Z/X are A/B; Enter starts; Right Shift selects; Escape pauses. USB and Bluetooth keyboards use the same controls.",fontSize=12.sp,color=FireSpotTextSecondary)
+            Text("Audio uses the game core’s native sample rate. Menu opens save slots, load, reset and exit during play.",fontSize=12.sp,color=FireSpotTextSecondary)
+            Text("ABOUT THIS BUILD",color=FireSpotTextSubtitle,fontSize=10.sp,letterSpacing=2.sp)
+            SettingsRow(if(BuildConfig.BUNDLED_CORE) "Phase 0 · Self-contained demo" else "Standard · Separate console software",if(BuildConfig.BUNDLED_CORE) "Game Boy / Game Boy Color support is included. The standard APK keeps emulator cores separate." else "Game Boy support must be installed separately before playing.")
+            Text("FireSpot · GPL-3.0-or-later · Upstream component notices retained.\nGambatte · GPL-2.0 · Source and license included with the demo distribution.\nStarter games · CC0-1.0 · No commercial games or proprietary BIOS included.",color=FireSpotTextSubtitle,fontSize=11.sp,lineHeight=18.sp)
         }
     }
 }
-
 @Composable
-fun SettingsNavTab(
-    tab: MockupSettingsTab,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(48.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(
-                when {
-                    isFocused -> FireSpotSearchFocusedBg
-                    isSelected -> Color(0x331E3C7A)
-                    else -> FireSpotGlassCard
-                }
-            )
-            .border(
-                width = if (isFocused) 2.dp else 1.dp,
-                color = if (isFocused) FireSpotAccentBlue else FireSpotGlassBorder,
-                shape = RoundedCornerShape(12.dp)
-            )
-            .focusable(interactionSource = interactionSource)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            )
-            .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(text = tab.icon, fontSize = 16.sp, color = FireSpotTextPrimary)
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(
-            text = tab.label,
-            color = if (isSelected || isFocused) FireSpotTextPrimary else FireSpotTextSecondary,
-            fontSize = 14.sp,
-            fontWeight = if (isSelected || isFocused) FontWeight.Bold else FontWeight.Medium
-        )
+private fun SettingsRow(title:String,body:String) {
+    Column(Modifier.fillMaxWidth().glassFinish().padding(18.dp),verticalArrangement=Arrangement.spacedBy(8.dp)) {
+        Text(title,color=FireSpotTextPrimary,fontSize=15.sp)
+        Text(body,color=FireSpotTextSecondary,fontSize=12.sp,lineHeight=18.sp)
     }
 }

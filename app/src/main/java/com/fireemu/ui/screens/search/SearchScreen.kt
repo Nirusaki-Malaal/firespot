@@ -23,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -54,6 +55,17 @@ fun SearchScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .onPreviewKeyEvent { event ->
+                val key=event.nativeKeyEvent
+                val typed=key.unicodeChar
+                val editing=key.keyCode==android.view.KeyEvent.KEYCODE_DEL || (typed>=32 && !key.isCtrlPressed && !key.isAltPressed)
+                if(editing) {
+                    if(key.action==android.view.KeyEvent.ACTION_DOWN) {
+                        if(key.keyCode==android.view.KeyEvent.KEYCODE_DEL) viewModel.backspace() else viewModel.appendChar(typed.toChar())
+                    }
+                    true
+                } else false
+            }
             .background(FireSpotBackgroundGradient)
             .padding(horizontal = 48.dp, vertical = 27.dp)
     ) {
@@ -66,7 +78,7 @@ fun SearchScreen(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "⚡",
+                        text = "",
                         fontSize = 24.sp,
                         color = FireSpotBrandAmberTop
                     )
@@ -81,7 +93,7 @@ fun SearchScreen(
                     Box(
                         modifier = Modifier
                             .width(380.dp)
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(RoundedCornerShape(6.dp))
                             .background(FireSpotGlassCard)
                             .padding(horizontal = 16.dp, vertical = 10.dp)
                     ) {
@@ -94,8 +106,7 @@ fun SearchScreen(
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    HeaderPillButton(icon = "🎙", label = "Voice Search", onClick = { viewModel.startVoiceSearch() })
-                    HeaderPillButton(icon = "←", label = "Back", onClick = onNavigateBack)
+                    HeaderPillButton(icon = "back", label = "Back", onClick = onNavigateBack)
                 }
             }
 
@@ -112,9 +123,10 @@ fun SearchScreen(
                         .fillMaxHeight()
                 ) {
                     TvKeyboard(
-                        onKeyPressed = { viewModel.appendChar(it) },
-                        onDeletePressed = { viewModel.deleteChar() },
-                        onClearPressed = { viewModel.clearQuery() }
+                        onChar = { viewModel.appendChar(it) },
+                        onBackspace = { viewModel.backspace() },
+                        onSpace = { viewModel.appendSpace() },
+                        onClear = { viewModel.clearQuery() }
                     )
                 }
 
@@ -130,7 +142,7 @@ fun SearchScreen(
                         )
                     } else {
                         LazyVerticalGrid(
-                            columns = GridCells.Fixed(4),
+                            columns = GridCells.Adaptive(210.dp),
                             modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.spacedBy(16.dp),
                             horizontalArrangement = Arrangement.spacedBy(14.dp),

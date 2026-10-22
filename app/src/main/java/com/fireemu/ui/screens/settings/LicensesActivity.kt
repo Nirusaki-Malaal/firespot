@@ -14,7 +14,7 @@ class LicensesActivity : Activity() {
         val btnBack = findViewById<Button>(R.id.btn_licenses_back)
         btnBack?.setOnClickListener { finish() }
 
-        val tvLicenses = findViewById<TextView>(R.id.tv_licenses_body)
+        val tvLicenses = findViewById<TextView>(R.id.tv_licenses_content)
         tvLicenses?.text = """
             FireEmu Suite Open Source Licenses & Acknowledgements:
             
