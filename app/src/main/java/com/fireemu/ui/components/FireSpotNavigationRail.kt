@@ -78,7 +78,7 @@ fun FireSpotNavigationRail(
             .background(FireSpotDarkNavy.copy(alpha = if (isRailFocused) 0.98f else 0.85f))
             .border(
                 width = 1.dp,
-                color = Color(0x1F2D5BFF),
+                color = Color(0x1F5D5D5D),
                 shape = RoundedCornerShape(topEnd = 16.dp, bottomEnd = 16.dp)
             )
             .onFocusChanged { focusState ->
@@ -103,7 +103,7 @@ fun FireSpotNavigationRail(
                     modifier = Modifier.padding(horizontal = 10.dp)
                 ) {
                     Text(
-                        text = "⚡",
+                        text = "FS",
                         fontSize = 24.sp,
                         color = FireSpotAccentWarm
                     )
@@ -140,7 +140,7 @@ fun FireSpotNavigationRail(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(6.dp))
                     .background(Color(0x14FFFFFF))
                     .padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -195,20 +195,19 @@ fun NavRailButton(
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp)
-            .clip(RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(6.dp))
             .background(
                 when {
                     isFocused -> FireSpotBlue.copy(alpha = 0.25f)
-                    isSelected -> Color(0x1A2D5BFF)
+                    isSelected -> Color(0x1A5D5D5D)
                     else -> Color.Transparent
                 }
             )
             .border(
                 width = if (isFocused) 2.dp else 0.dp,
                 color = if (isFocused) FireSpotFocusBorder else Color.Transparent,
-                shape = RoundedCornerShape(10.dp)
+                shape = RoundedCornerShape(6.dp)
             )
-            .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,

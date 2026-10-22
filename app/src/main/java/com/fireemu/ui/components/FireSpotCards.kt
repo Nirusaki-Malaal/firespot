@@ -1,5 +1,7 @@
 package com.fireemu.ui.components
 
+import androidx.compose.foundation.layout.Arrangement
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -56,7 +58,7 @@ fun FireSpotPosterCard(
         modifier = modifier
             .width(if (rank != null) 210.dp else 165.dp)
             .height(250.dp)
-    ) { isFocused, isExpandedPreview ->
+    ) { isFocused ->
         Row(modifier = Modifier.fillMaxSize()) {
             if (rank != null) {
                 // Large Top-10 Rank Numeral beside card
@@ -80,7 +82,7 @@ fun FireSpotPosterCard(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(6.dp))
             ) {
                 // Cover Image or Fallback
                 if (!game.coverArtPath.isNullOrEmpty()) {
@@ -101,7 +103,7 @@ fun FireSpotPosterCard(
                         .align(Alignment.BottomCenter)
                         .background(
                             Brush.verticalGradient(
-                                listOf(Color.Transparent, Color(0xCC0B0F1A), Color(0xF00B0F1A))
+                                listOf(Color.Transparent, Color(0xCC0F0F0F), Color(0xF00F0F0F))
                             )
                         )
                 )
@@ -140,7 +142,7 @@ fun FireSpotPosterCard(
                     }
 
                     // Mini preview state when focused for 800ms
-                    if (isExpandedPreview) {
+                    if (isFocused) {
                         Row(
                             modifier = Modifier.padding(top = 4.dp),
                             verticalAlignment = Alignment.CenterVertically
@@ -178,7 +180,7 @@ fun FireSpotLandscapeCard(
         modifier = modifier
             .width(260.dp)
             .height(150.dp)
-    ) { isFocused, isExpandedPreview ->
+    ) { isFocused ->
         Box(modifier = Modifier.fillMaxSize()) {
             if (!game.coverArtPath.isNullOrEmpty()) {
                 AsyncImage(
@@ -196,7 +198,7 @@ fun FireSpotLandscapeCard(
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            listOf(Color.Transparent, Color(0x990B0F1A), Color(0xF20B0F1A))
+                            listOf(Color.Transparent, Color(0x990F0F0F), Color(0xF20F0F0F))
                         )
                     )
             )
@@ -281,7 +283,7 @@ fun FireSpotConsoleTile(
         modifier = modifier
             .width(200.dp)
             .height(110.dp)
-    ) { isFocused, _ ->
+    ) { isFocused ->
         Box(
             modifier = Modifier
                 .fillMaxSize()

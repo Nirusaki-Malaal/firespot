@@ -1,5 +1,7 @@
 package com.fireemu.ui.theme
 
+import androidx.compose.ui.graphics.Color
+
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -61,6 +63,6 @@ val FireSpotTypography = Typography(
         fontWeight = FontWeight.Normal, // 400
         fontSize = 11.sp,
         lineHeight = 14.sp,
-        color = Color(0xFFCBD5EA)
+        color = Color(0xFFD4D4D4)
     )
 )

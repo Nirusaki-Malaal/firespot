@@ -20,6 +20,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,6 +40,8 @@ fun TvKeyboard(
     onClear: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val firstFocus = remember {FocusRequester()}
+    LaunchedEffect(Unit) {firstFocus.requestFocus()}
     val rows = listOf(
         listOf('A', 'B', 'C', 'D', 'E', 'F'),
         listOf('G', 'H', 'I', 'J', 'K', 'L'),
@@ -57,6 +62,7 @@ fun TvKeyboard(
                 rowChars.forEach { char ->
                     TvKey(
                         label = char.toString(),
+                        modifier = if(char == 'A') Modifier.focusRequester(firstFocus) else Modifier,
                         onClick = { onChar(char) }
                     )
                 }
@@ -91,13 +97,14 @@ fun TvKeyboard(
 private fun TvKey(
     label: String,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     widthDp: Int = 44
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .size(width = widthDp.dp, height = 44.dp)
             .border(
                 width = if (isFocused) 2.dp else 1.dp,
@@ -108,12 +115,7 @@ private fun TvKey(
                 color = if (isFocused) FocusBorder else CardBg,
                 shape = RoundedCornerShape(6.dp)
             )
-            .focusable(interactionSource = interactionSource)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            ),
+            .tvAction(interactionSource,action=onClick),
         contentAlignment = Alignment.Center
     ) {
         Text(

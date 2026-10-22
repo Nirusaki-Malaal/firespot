@@ -31,7 +31,7 @@ fun CoverPlaceholder(
         colors = listOf(
             primaryColor.copy(alpha = 0.85f),
             primaryColor.copy(alpha = 0.4f),
-            Color(0xFF0F1218)
+            Color(0xFF121212)
         )
     )
 

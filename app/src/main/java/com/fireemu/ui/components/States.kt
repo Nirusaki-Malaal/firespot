@@ -113,7 +113,7 @@ fun ErrorState(
         ) {
             Text(
                 text = title,
-                color = Color(0xFFFF5252),
+                color = Color(0xFF777777),
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -147,8 +147,8 @@ fun ExitConfirmDialog(
         Box(
             modifier = Modifier
                 .width(440.dp)
-                .background(CardBg, RoundedCornerShape(16.dp))
-                .border(2.dp, FocusBorder, RoundedCornerShape(16.dp))
+                .background(CardBg, RoundedCornerShape(6.dp))
+                .border(2.dp, FocusBorder, RoundedCornerShape(6.dp))
                 .padding(32.dp)
         ) {
             Column(
