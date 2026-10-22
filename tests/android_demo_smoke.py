@@ -21,7 +21,7 @@ def wait(value):
  raise AssertionError(f'Missing {value!r}. Current texts: {texts(t)}')
 def click(value):
  t=wait(value)
- nodes=[n for n in t.iter('node') if value in n.get('text','')]
+ nodes=[n for n in t.iter('node') if n.get('text','')==value] or [n for n in t.iter('node') if value in n.get('text','')]
  n=nodes[0];x,y,a,b=map(int,re.findall(r'\d+',n.get('bounds')))
  assert n.get('enabled')!='false',f'{value} is disabled'
  shell('input','tap',str((x+a)//2),str((y+b)//2))
