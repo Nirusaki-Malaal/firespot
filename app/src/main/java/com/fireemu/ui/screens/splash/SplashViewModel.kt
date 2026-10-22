@@ -19,7 +19,7 @@ class SplashViewModel(
     init {
         viewModelScope.launch {
             // Guarantee fast splash transition under 1.2s for Fire TV
-            delay(1000)
+            com.fireemu.FireEmuApp.instance.prepareStarterGames()
             val settings = settingsRepository.getSettings().first()
             if (settings.isOnboardingCompleted) {
                 _navigateToRoute.value = "home"

@@ -1,103 +1,30 @@
 package com.fireemu.ui.screens.onboarding
-
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.*
+import androidx.compose.ui.*
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.fireemu.ui.components.TvButton
-import com.fireemu.ui.theme.FireSpotAccentWarm
-import com.fireemu.ui.theme.FireSpotDarkNavy
-import com.fireemu.ui.theme.FireSpotTextSecondary
-import com.fireemu.ui.theme.FireSpotTextWhite
-
+import androidx.compose.ui.unit.*
+import com.fireemu.ui.components.*
+import com.fireemu.ui.theme.*
 @Composable
-fun OnboardingScreen(
-    viewModel: OnboardingViewModel,
-    onFinish: () -> Unit
-) {
-    val uiState by viewModel.uiState.collectAsState()
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(FireSpotDarkNavy)
-            .padding(horizontal = 48.dp, vertical = 32.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "⚡",
-                    fontSize = 40.sp,
-                    color = FireSpotAccentWarm
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = "Welcome to FireSpot",
-                    color = FireSpotTextWhite,
-                    fontSize = 38.sp,
-                    fontWeight = FontWeight.Black
-                )
+fun OnboardingScreen(viewModel:OnboardingViewModel,onFinish:()->Unit) {
+    val focus=remember {FocusRequester()}
+    Box(Modifier.fillMaxSize().etchedBackdrop().padding(48.dp),contentAlignment=Alignment.Center) {
+        Column(Modifier.width(540.dp),verticalArrangement=Arrangement.spacedBy(20.dp)) {
+            FireSpotIcon("brand",Modifier.size(38.dp))
+            Text("Your next little escape.",fontSize=36.sp,fontWeight=FontWeight.Light,color=FireSpotTextPrimary)
+            Text("Two original Game Boy games are already in your library. No ROM upload, account or BIOS needed for the demo.",fontSize=16.sp,lineHeight=24.sp,color=FireSpotTextSecondary)
+            Row(horizontalArrangement=Arrangement.spacedBy(24.dp)) {
+                Text("D-PAD  Navigate",color=FireSpotTextPrimary,fontSize=12.sp)
+                Text("SELECT  Confirm",color=FireSpotTextPrimary,fontSize=12.sp)
+                Text("MENU  Pause",color=FireSpotTextPrimary,fontSize=12.sp)
             }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            Text(
-                text = "The ultimate streaming-style retro gaming hub for Amazon Fire TV.",
-                color = FireSpotTextSecondary,
-                fontSize = 18.sp
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            if (uiState.isScanning) {
-                Text(
-                    text = "Scanning storage for games... ${uiState.foundGamesCount} titles indexed",
-                    color = FireSpotAccentWarm,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            } else if (uiState.scanCompleted) {
-                Text(
-                    text = "Setup Complete! Found ${uiState.foundGamesCount} games ready to play.",
-                    color = FireSpotTextWhite,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                TvButton(
-                    text = "Start Browsing FireSpot",
-                    onClick = {
-                        viewModel.completeOnboarding()
-                        onFinish()
-                    },
-                    isPrimary = true
-                )
-            } else {
-                TvButton(
-                    text = "Scan Default Storage & USB",
-                    onClick = { viewModel.startScan() },
-                    isPrimary = true
-                )
-            }
+            TvButton("Open my library",{viewModel.completeOnboarding(onFinish)},Modifier.focusRequester(focus),isPrimary=true)
+            Text("ORIGINAL HOMEBREW  /  LOCAL SAVES  /  OFFLINE PLAY",fontSize=10.sp,letterSpacing=1.5.sp,color=FireSpotTextSubtitle)
         }
     }
+    LaunchedEffect(Unit) {focus.requestFocus()}
 }

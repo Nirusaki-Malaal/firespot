@@ -22,6 +22,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,13 +48,22 @@ fun FilteredGridScreen(
     onSelectRailTab: (LeftRailTab) -> Unit,
     emptyMessage: String = "No games found in this collection."
 ) {
+    val firstFocus = remember { FocusRequester() }
     var sortMode by remember { mutableStateOf("A-Z") }
-    val sortedGames = when (sortMode) {
-        "Recent" -> games.sortedByDescending { it.lastPlayedTimestamp }
-        "Added" -> games.sortedByDescending { it.dateAddedTimestamp }
-        else -> games.sortedBy { it.cleanTitle }
+    var system by remember { mutableStateOf<String?>(null) }
+    var genre by remember { mutableStateOf<String?>(null) }
+    val systems=remember(games) {listOf<String?>(null)+games.map {it.consoleId}.distinct().sorted()}
+    val genres=remember(games) {listOf<String?>(null)+games.map {it.genre}.distinct().sorted()}
+    val sortedGames = remember(games, sortMode, system, genre) {
+        val selected=games.filter {(system==null || it.consoleId==system) && (genre==null || it.genre==genre)}
+        when (sortMode) {
+            "Recent" -> selected.sortedByDescending { it.lastPlayedTimestamp }
+            "Added" -> selected.sortedByDescending { it.dateAddedTimestamp }
+            else -> selected.sortedBy { it.cleanTitle }
+        }
     }
 
+    LaunchedEffect(sortedGames.isNotEmpty()) { if(sortedGames.isNotEmpty()) firstFocus.requestFocus() }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -98,7 +110,13 @@ fun FilteredGridScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(horizontalArrangement=Arrangement.spacedBy(12.dp)) {
+                    HeaderPillButton("console","System: ${system?.let {com.fireemu.domain.models.ConsoleType.fromId(it).shortName} ?: "All"}", {system=systems[(systems.indexOf(system)+1)%systems.size]})
+                    HeaderPillButton("library","Genre: ${genre?:"All"}",{genre=genres[(genres.indexOf(genre)+1)%genres.size]})
+                    if(system!=null || genre!=null) HeaderPillButton("refresh","Clear filters",{system=null;genre=null})
+                }
+                Spacer(modifier = Modifier.height(12.dp))
 
                 if (sortedGames.isEmpty()) {
                     EmptyState(
@@ -109,7 +127,7 @@ fun FilteredGridScreen(
                     )
                 } else {
                     LazyVerticalGrid(
-                        columns = GridCells.Fixed(6),
+                        columns = GridCells.Adaptive(220.dp),
                         modifier = Modifier.fillMaxSize(),
                         verticalArrangement = Arrangement.spacedBy(20.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -119,6 +137,7 @@ fun FilteredGridScreen(
                             MockupContinuePlayingCard(
                                 game = game,
                                 isMostRecentOrHasState = false,
+                                modifier = if(game.id == sortedGames.first().id) Modifier.focusRequester(firstFocus) else Modifier,
                                 onClick = { onSelectGame(game.id) }
                             )
                         }

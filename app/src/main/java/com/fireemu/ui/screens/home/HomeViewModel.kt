@@ -35,11 +35,13 @@ class HomeViewModel(
         loadData()
     }
 
+    private var loadJob: kotlinx.coroutines.Job? = null
+
     fun loadData() {
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             try {
-                val counts = getGamesUseCase.getGameCounts()
 
                 getGamesUseCase.getAllGames().collect { games ->
                     val featured = games.take(5)
@@ -55,7 +57,7 @@ class HomeViewModel(
 
                     _uiState.value = HomeUiState(
                         isLoading = false,
-                        consoleCounts = counts,
+                        consoleCounts = games.groupingBy { it.consoleId }.eachCount(),
                         allGames = games,
                         heroGames = if (featured.isNotEmpty()) featured else games,
                         recentGames = recents,
@@ -67,6 +69,8 @@ class HomeViewModel(
                         rpgGames = rpgs
                     )
                 }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,

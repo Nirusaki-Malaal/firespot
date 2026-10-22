@@ -31,6 +31,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -64,6 +67,7 @@ fun ConsoleLibraryScreen(
     onNavigateBack: () -> Unit,
     onNavigateSettings: () -> Unit
 ) {
+    val firstFocus = remember { FocusRequester() }
     val uiState by viewModel.uiState.collectAsState()
     var filterSortMode by remember { mutableStateOf("A-Z") }
 
@@ -72,7 +76,7 @@ fun ConsoleLibraryScreen(
         return
     }
 
-    val console = ConsoleType.fromId(uiState.consoleId)
+    val console = uiState.console
     val accentColor = getConsoleColor(console.id)
 
     val sortedGames = when (filterSortMode) {
@@ -81,6 +85,7 @@ fun ConsoleLibraryScreen(
         else -> uiState.games.sortedBy { it.cleanTitle }
     }
 
+    LaunchedEffect(sortedGames.isNotEmpty()) { if(sortedGames.isNotEmpty()) firstFocus.requestFocus() }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -136,7 +141,7 @@ fun ConsoleLibraryScreen(
                     GlassSortChip("A-Z", isSelected = filterSortMode == "A-Z", onClick = { filterSortMode = "A-Z" })
                     GlassSortChip("Recent", isSelected = filterSortMode == "Recent", onClick = { filterSortMode = "Recent" })
                     GlassSortChip("Added", isSelected = filterSortMode == "Added", onClick = { filterSortMode = "Added" })
-                    HeaderPillButton(icon = "←", label = "Back", onClick = onNavigateBack)
+                    HeaderPillButton(icon = "back", label = "Back", onClick = onNavigateBack)
                 }
             }
 
@@ -152,7 +157,7 @@ fun ConsoleLibraryScreen(
                 )
             } else {
                 LazyVerticalGrid(
-                    columns = GridCells.Fixed(6),
+                    columns = GridCells.Adaptive(220.dp),
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -162,6 +167,7 @@ fun ConsoleLibraryScreen(
                         MockupContinuePlayingCard(
                             game = game,
                             isMostRecentOrHasState = false,
+                                modifier = if(game.id == sortedGames.first().id) Modifier.focusRequester(firstFocus) else Modifier,
                             onClick = { onSelectGame(game.id) }
                         )
                     }
@@ -183,20 +189,19 @@ fun GlassSortChip(
     Box(
         modifier = Modifier
             .height(40.dp)
-            .clip(RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(6.dp))
             .background(
                 when {
-                    isFocused -> Color(0x333D8BFF)
-                    isSelected -> Color(0x1F3D8BFF)
+                    isFocused -> Color(0x33838383)
+                    isSelected -> Color(0x1F838383)
                     else -> FireSpotGlassCard
                 }
             )
             .border(
                 width = if (isFocused) 2.dp else 1.dp,
                 color = if (isFocused) FireSpotAccentBlue else FireSpotGlassBorder,
-                shape = RoundedCornerShape(10.dp)
+                shape = RoundedCornerShape(6.dp)
             )
-            .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
