@@ -2,6 +2,8 @@
 
 ## Continuous integration
 
+The first standalone repository run passed: https://github.com/Nirusaki-Malaal/firespot/actions/runs/39773037599.
+
 Android CI runs on main/codex branch pushes, pull requests and manual dispatch. It installs pinned Android SDK/NDK tools, builds genuine Gambatte assets from the pinned source, builds both app flavors, runs lint/JVM tests, checks APK CPU/packaging rules, runs negative packaging tests, and executes the real host core against original cartridges. Reports and debug APKs are uploaded even when a prior check fails.
 
 The build uses JDK 17, Gradle 8.6 with wrapper checksum, SDK/build-tools 34 and NDK 28.2.13676358. Unit tests cover catalog signature tampering, another publisher's signature, altered bytes/length, wrong ELF architecture and redirect host/protocol restrictions. Host tests cover real frames, audio samples, controls, scoring and deterministic state restoration.

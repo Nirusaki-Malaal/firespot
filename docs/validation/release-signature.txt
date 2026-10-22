@@ -1,0 +1,17 @@
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): false
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+Signer #1 certificate DN: CN=FireSpot Release, OU=Open Source, O=FireSpot
+Signer #1 certificate SHA-256 digest: debd0afe95d3a8202aebd4bd107882871df9a7120234b3a23f421c60faef1f9e
+Signer #1 certificate SHA-1 digest: 59ed6503af4352cd936886d7f0651353e282207b
+Signer #1 certificate MD5 digest: 2a8f8462dafe03601c473ab7e37d27e8
+Signer #1 key algorithm: RSA
+Signer #1 key size (bits): 3072
+Signer #1 public key SHA-256 digest: 9e00b5729e6327fa3597619fe9a2d2d8c61ce8dc4d0d4f794f9fcb1c998ca248
+Signer #1 public key SHA-1 digest: 1ee796aa6f89ad03e0fa120cf026bc0cf074d4c6
+Signer #1 public key MD5 digest: 0ddf2dcad0c659d700a60e94e93e2c24

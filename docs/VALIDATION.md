@@ -34,6 +34,12 @@ python3 tests/android_online_smoke.py --serial YOUR_SERIAL --out artifacts/evide
 
 The online test expects an initialized/fresh standard installation and public network connectivity. Select the intended device explicitly. Do not clear data on a personal device with saves simply to run a test. The provider-specific extras script targets the local AOSP DocumentsUI layout and may need navigation changes for another provider. Test code does not automatically establish an Amazon session.
 
+## Signed release and remote CI
+
+The signed/minified standard APK also passed four local Android walkthrough checks: real on-demand core/gameplay, keyboard/pause/controls/save/resume, catalog acquisition/play of a new title, and search/library/resume across process restart. The installed release is version 0.2.0, versionCode 2, without the DEBUGGABLE flag. Its certificate and packaging reports are recorded with the evidence.
+
+[Remote Android CI passed](https://github.com/Nirusaki-Malaal/firespot/actions/runs/39773037599), including both debug distributions, lint, security tests, packaging checks and real host core checks. See docs/validation for compact public records; generic Android results still do not certify Fire TV.
+
 ## Still required
 
 - Official Fire TV hardware or official virtual-device acceptance from install through play, audio, pause, save/exit, restart and resume.
@@ -42,7 +48,7 @@ The online test expects an initialized/fresh standard installation and public ne
 - Network interruption, slow transfer/cancel, low storage and corrupted catalog/cache exercise on target. Security failure checks are useful, but they do not replace all device-level recovery tests.
 - Autosave corruption recovery on a device, beyond retaining backup files and exercising successful resumes.
 - Target-device launcher frame-time/launch-time/memory measurements, core frame pacing and audible audio behavior.
-- Release/minified APK runtime walk-through and the remote CI/release workflow status for the specific release being shipped.
+- Track the signed release workflow status for the specific tag; a local signed runtime walkthrough has passed.
 
 ## Phase status
 

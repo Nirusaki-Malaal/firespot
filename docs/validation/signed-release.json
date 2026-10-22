@@ -1,0 +1,21 @@
+{
+  "scope": "Signed/minified release APK on local AOSP Android 11, not official Fire TV",
+  "checks": [
+    {
+      "check": "Signed/minified core-free APK downloads console support and launches native gameplay",
+      "result": "passed"
+    },
+    {
+      "check": "Release keyboard movement, pause, controls, save/exit and resume",
+      "result": "passed"
+    },
+    {
+      "check": "Release catalog installs and plays a new downloadable game",
+      "result": "passed"
+    },
+    {
+      "check": "Release search, installed library and resume survive process restart",
+      "result": "passed"
+    }
+  ]
+}

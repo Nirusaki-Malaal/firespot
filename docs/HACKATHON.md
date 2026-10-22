@@ -12,7 +12,7 @@ The practical first experience uses small original CC0 games. It avoids presenti
 
 Primary intended track: Fire TV. The supplied rules require the demo to show a real Fire TV device or the official Fire TV/Vega simulator. Our generic Android emulator captures do not satisfy that requirement on their own. The Android APK targets Fire OS; a Vega presentation needs a separate compatible implementation/runtime.
 
-Open Source: the public application fork and public core-release repository provide contribution URLs, source, licenses and implementation history. Verify the event window and include the GitHub username, repository and contribution description in the submission. Merely making an old repository public is not a description of what changed during the event.
+Open Source: the standalone public application repository and public core-release repository provide contribution URLs, source, licenses and implementation history. Verify the event window and include the GitHub username, repository and contribution description in the submission. Merely making an old repository public is not a description of what changed during the event.
 
 AWS Builder: installing AWS CLI/Session Manager for remote-device access does not establish an AWS application integration. Do not claim Bedrock, AgentCore, cloud saves or another AWS service unless it is actually called and demonstrated. No Alexa+, Ring or Bee integration is currently claimed.
 

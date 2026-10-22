@@ -1,0 +1,21 @@
+PASS: player reaches checkpoint and scores a point
+{
+  "scope": "Linux host core only; Android/Fire TV unverified",
+  "video_frames": 532,
+  "resolution": [
+    160,
+    144
+  ],
+  "dpad_changes_video": true,
+  "audio_samples": 584688,
+  "nonzero_audio_samples": 47298,
+  "save_state_roundtrip": true,
+  "state_bytes": 35074,
+  "pixel_format": 2
+}
+[Gambatte] Rumble environment not supported.
+[Gambatte] No system directory defined, unable to look for 'gbc_bios.bin'.
+[Gambatte] MBC1 ROM+RAM+BATTERY loaded.
+[Gambatte] rambanks: 1
+[Gambatte] rombanks: 2
+[Gambatte] Got internal game name: SIGNAL RUNNER.

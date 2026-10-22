@@ -15,3 +15,6 @@ artifacts/
 __pycache__/
 /app/build
 /artifacts
+*.p12
+*.jks
+*.pem
