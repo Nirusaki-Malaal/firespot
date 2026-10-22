@@ -37,7 +37,7 @@ fun SettingsScreen(viewModel:SettingsViewModel,onOpenDiscover:()->Unit,onNavigat
                     var name="Imported game.gb"
                     context.contentResolver.query(uri,arrayOf(OpenableColumns.DISPLAY_NAME),null,null,null)?.use {if(it.moveToFirst()) name=it.getString(0)}
                     val ext=name.substringAfterLast('.').lowercase()
-                    val console=when(ext) {"gb","gbc"->com.fireemu.domain.models.ConsoleType.GAMEBOY;"nes"->com.fireemu.domain.models.ConsoleType.NES;"gba"->com.fireemu.domain.models.ConsoleType.GBA;else->error("Choose a .gb, .gbc, .nes or .gba cartridge. Disc sets need a separate transfer flow.")}
+                    val console=when(ext) {"gb","gbc"->com.fireemu.domain.models.ConsoleType.GAMEBOY;"nes"->com.fireemu.domain.models.ConsoleType.NES;"gba"->com.fireemu.domain.models.ConsoleType.GBA;"sfc","smc"->com.fireemu.domain.models.ConsoleType.SNES;"sms"->com.fireemu.domain.models.ConsoleType.MASTERSYSTEM;"gg"->com.fireemu.domain.models.ConsoleType.GAMEGEAR;"sg"->com.fireemu.domain.models.ConsoleType.SG1000;else->error("Choose a GB/GBC, NES, GBA, SNES, Master System, Game Gear or SG-1000 cartridge. Disc sets need a separate transfer flow.")}
                     val maxBytes=if(console==com.fireemu.domain.models.ConsoleType.GAMEBOY) 8L*1024*1024 else 32L*1024*1024
                     val dir=File(context.filesDir,"games/imports").apply {mkdirs()}
                     val temp=File.createTempFile("import-",".tmp",dir)
@@ -54,7 +54,9 @@ fun SettingsScreen(viewModel:SettingsViewModel,onOpenDiscover:()->Unit,onNavigat
                                 val header=ByteArray(16);temp.inputStream().use {check(it.read(header)==16)}
                                 require(header.take(4)==listOf<Byte>(78,69,83,26) && total>=16+(header[4].toInt() and 255)*16384L+(header[5].toInt() and 255)*8192L) {"This is not a complete iNES cartridge."}
                             }
-                            else -> require(total>=192) {"The GBA cartridge is incomplete."}
+                            com.fireemu.domain.models.ConsoleType.GBA -> require(total>=192) {"The GBA cartridge is incomplete."}
+                            com.fireemu.domain.models.ConsoleType.SNES -> require(total>=32768 && (total%1024==0L || total%1024==512L)) {"This is not a complete SNES cartridge."}
+                            else -> require(total>=1024 && total%1024==0L) {"This Sega cartridge is incomplete."}
                         }
                         val hash=digest.digest().joinToString("") {"%02x".format(it)}
                         val file=File(dir,"$hash.${name.substringAfterLast('.').lowercase()}")

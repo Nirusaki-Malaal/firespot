@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Verify published catalog signatures and every release core/game without GitHub credentials."""
-import hashlib,json,subprocess,tempfile,urllib.request
+import argparse,hashlib,json,subprocess,tempfile,urllib.request
 from pathlib import Path
 from verify_artifacts import check_elf
-BASE='https://github.com/Nirusaki-Malaal/firespot-cores/releases/download/phase1-v1'
+BASE='https://github.com/Nirusaki-Malaal/firespot-cores/releases/download/phase1-v2'
 def fetch(url):
  req=urllib.request.Request(url,headers={'User-Agent':'FireSpot-release-check'})
  with urllib.request.urlopen(req,timeout=30) as r:return r.read()

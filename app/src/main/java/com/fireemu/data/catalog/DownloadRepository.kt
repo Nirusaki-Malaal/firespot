@@ -18,7 +18,7 @@ import java.util.Base64
 /** The signed embedded catalog remains available offline; refresh is explicitly requested. */
 class DownloadRepository(private val context:Context,private val games:GameRepository) {
     companion object {
-        const val RELEASE="https://github.com/Nirusaki-Malaal/firespot-cores/releases/download/phase1-v1"
+        const val RELEASE="https://github.com/Nirusaki-Malaal/firespot-cores/releases/download/phase1-v2"
     }
     data class Transfer(val id:String="",val message:String="",val progress:Int=0,val busy:Boolean=false,val failed:Boolean=false)
     private val network=ReleaseDownloader()
@@ -81,7 +81,7 @@ class DownloadRepository(private val context:Context,private val games:GameRepos
         // Match content hashes, not user-controlled server filenames, for repeat installs.
         val existing=games.getGameByPath(file.absolutePath)
         if(existing!=null)return@operation existing
-        games.insertOrUpdateGames(listOf(Game(title=entry.title,cleanTitle=entry.title,romPath=file.absolutePath,consoleId=entry.consoleId,fileSizeBytes=entry.asset.bytes,genre="Homebrew",releaseYear=2026,maxPlayers=1,rating="",description=entry.description)))
+        games.insertOrUpdateGames(listOf(Game(title=entry.title,cleanTitle=entry.title,romPath=file.absolutePath,consoleId=entry.consoleId,fileSizeBytes=entry.asset.bytes,genre=entry.genre,releaseYear=entry.year,maxPlayers=entry.players,rating="",description=entry.description)))
         games.getGameByPath(file.absolutePath) ?: error("The downloaded game could not be added to your library.")
     }
     private suspend fun <T> operation(id:String,message:String,block:suspend ()->T):T=withContext(Dispatchers.IO) {

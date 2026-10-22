@@ -32,6 +32,10 @@ enum class ConsoleType(
         coreLibName = "libretro_mgba.so",
         themeColorHex = 0xFF303F9FL
     ),
+    SNES("snes", "Super Nintendo / Super Famicom", "SNES", listOf(".sfc", ".smc"), "libretro_bsnes2014.so", 0xFF606060L),
+    MASTERSYSTEM("mastersystem", "Sega Master System", "Master System", listOf(".sms"), "libretro_gearsystem.so", 0xFF606060L),
+    GAMEGEAR("gamegear", "Sega Game Gear", "Game Gear", listOf(".gg"), "libretro_gearsystem.so", 0xFF606060L),
+    SG1000("sg1000", "Sega SG-1000", "SG-1000", listOf(".sg"), "libretro_gearsystem.so", 0xFF606060L),
     PS1(
         id = "ps1",
         displayName = "Sony PlayStation 1",
