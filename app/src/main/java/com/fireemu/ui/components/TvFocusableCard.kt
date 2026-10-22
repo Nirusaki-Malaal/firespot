@@ -24,8 +24,10 @@ fun TvFocusableCard(
 ) {
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
+    val action = rememberFireSpotAction(onClick)
+    FireSpotFocusFeedback(focused)
     // Exactly one focus target; focus changes do not resize/re-layout the card.
     Box(modifier.clip(shape).glassFinish()
         .border(if(focused) borderWidth else 1.dp, if(focused) FireSpotFocusBorder else FireSpotGlassBorder,shape)
-        .tvAction(interaction,action=onClick)) { content(focused) }
+        .tvAction(interaction,action=action)) { content(focused) }
 }

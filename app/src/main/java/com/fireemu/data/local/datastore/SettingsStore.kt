@@ -27,6 +27,8 @@ class SettingsStore(private val context: Context) {
     private val KEY_FAST_FORWARD = floatPreferencesKey("fast_forward_speed")
     private val KEY_AUTO_SAVE = booleanPreferencesKey("auto_save_exit")
     private val KEY_ONBOARDING = booleanPreferencesKey("onboarding_completed")
+    private val KEY_UI_AMBIENT = booleanPreferencesKey("ui_ambient_enabled")
+    private val KEY_UI_SOUNDS = booleanPreferencesKey("ui_sounds_enabled")
 
     val settingsFlow: Flow<AppSettings> = context.dataStore.data.map { prefs ->
         val dirsStr = prefs[KEY_ROM_DIRS] ?: "/sdcard/ROMs"
@@ -44,7 +46,9 @@ class SettingsStore(private val context: Context) {
             audioBufferSize = prefs[KEY_AUDIO_BUF] ?: 1600,
             fastForwardSpeed = prefs[KEY_FAST_FORWARD] ?: 2.0f,
             autoSaveOnExit = prefs[KEY_AUTO_SAVE] ?: true,
-            isOnboardingCompleted = prefs[KEY_ONBOARDING] ?: false
+            isOnboardingCompleted = prefs[KEY_ONBOARDING] ?: false,
+            uiAmbientEnabled = prefs[KEY_UI_AMBIENT] ?: true,
+            uiSoundsEnabled = prefs[KEY_UI_SOUNDS] ?: true
         )
     }
 
@@ -60,6 +64,8 @@ class SettingsStore(private val context: Context) {
             prefs[KEY_FAST_FORWARD] = settings.fastForwardSpeed
             prefs[KEY_AUTO_SAVE] = settings.autoSaveOnExit
             prefs[KEY_ONBOARDING] = settings.isOnboardingCompleted
+            prefs[KEY_UI_AMBIENT] = settings.uiAmbientEnabled
+            prefs[KEY_UI_SOUNDS] = settings.uiSoundsEnabled
         }
     }
 

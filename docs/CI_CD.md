@@ -48,7 +48,7 @@ Do not retag an already distributed release to silently replace its app or core 
 The public core repository hosts native binaries, exact corresponding source, licenses and original game downloads as release assets. The application embeds the catalog signing public key. The RSA catalog private key is separate from the Android APK key and is not a GitHub Actions secret in this app repository.
 
 1. Rebuild pinned cores with the documented scripts.
-2. Test each new core and assign an honest experimental/verified status.
+2. Test each new core and record its observed compatibility evidence.
 3. Stage release files and sign the exact catalog bytes using prepare_catalog_release.py and the private catalog key.
 4. Verify signatures, checksums, ELF ABIs, sources and notices.
 5. Publish all referenced release assets before shipping an APK that points to them.

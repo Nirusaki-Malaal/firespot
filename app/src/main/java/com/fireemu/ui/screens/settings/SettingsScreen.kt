@@ -66,6 +66,12 @@ fun SettingsScreen(viewModel:SettingsViewModel,onOpenDiscover:()->Unit,onNavigat
                 HeaderPillButton("display","Frame counter: ${if(settings.showFps) "On" else "Off"}",{viewModel.toggleFps()})
                 HeaderPillButton("controller","Remap controls",onNavigateMapping)
             }
+            Text("SOUND & FEEL",color=FireSpotTextSubtitle,fontSize=10.sp,letterSpacing=2.sp)
+            Row(horizontalArrangement=Arrangement.spacedBy(12.dp)) {
+                HeaderPillButton("audio","Ambient audio: ${if(settings.uiAmbientEnabled) "On" else "Off"}",{viewModel.toggleUiAmbient()})
+                HeaderPillButton("audio","Interface sounds: ${if(settings.uiSoundsEnabled) "On" else "Off"}",{viewModel.toggleUiSounds()})
+            }
+            SettingsRow("Ambient audio","Optional low-volume background audio plays while you browse and pauses during games. Focus changes and clicks have soft audio feedback; vibration is used on devices that support it.")
             Text("Keyboard: arrows or WASD move; Z/X are A/B; Enter starts; Right Shift selects; Escape pauses. USB and Bluetooth keyboards use the same controls.",fontSize=12.sp,color=FireSpotTextSecondary)
             Text("Audio uses the game core’s native sample rate. Menu opens save slots, load, reset and exit during play.",fontSize=12.sp,color=FireSpotTextSecondary)
             Text("YOUR SETUP",color=FireSpotTextSubtitle,fontSize=10.sp,letterSpacing=2.sp)
@@ -74,8 +80,8 @@ fun SettingsScreen(viewModel:SettingsViewModel,onOpenDiscover:()->Unit,onNavigat
                 TvButton("Storage & playtime",onOpenStorage)
             }
             Text("ABOUT THIS BUILD",color=FireSpotTextSubtitle,fontSize=10.sp,letterSpacing=2.sp)
-            SettingsRow(if(BuildConfig.BUNDLED_CORE) "Phase 0 · Self-contained demo" else "Standard · Separate console software",if(BuildConfig.BUNDLED_CORE) "Game Boy / Game Boy Color support is included. The standard APK keeps emulator cores separate." else "Game Boy support must be installed separately before playing.")
-            Text("FireSpot · GPL-3.0-or-later · Upstream component notices retained.\nGambatte · GPL-2.0 · Source and license included with the demo distribution.\nStarter games · CC0-1.0 · No commercial games or proprietary BIOS included.",color=FireSpotTextSubtitle,fontSize=11.sp,lineHeight=18.sp)
+            SettingsRow(if(BuildConfig.BUNDLED_CORE) "Starter build · Offline Game Boy" else "Standard · Separate console software",if(BuildConfig.BUNDLED_CORE) "Game Boy / Game Boy Color support is included. The standard APK keeps emulator cores separate." else "Game Boy support must be installed separately before playing.")
+            Text("FireSpot · GPL-3.0-or-later · Upstream component notices retained.\nGambatte · GPL-2.0 · Source and license included with the bundled Game Boy build.\nStarter games · CC0-1.0 · No commercial games or proprietary BIOS included.",color=FireSpotTextSubtitle,fontSize=11.sp,lineHeight=18.sp)
         }
     }
 }

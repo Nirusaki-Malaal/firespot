@@ -43,13 +43,23 @@ The signed/minified standard APK also passed four local Android walkthrough chec
 ## Still required
 
 - Official Fire TV hardware or official virtual-device acceptance from install through play, audio, pause, save/exit, restart and resume.
+- In-app ambient playback on a speaker/headset: the local emulator has no active PulseAudio backend, so Android's player state and toggle behavior were checked, but the output was not acoustically verified.
 - Physical Bluetooth/USB keyboard and gamepad hot-plug/reconnect, simultaneous keys, device-specific keycodes and latency measurements.
-- Per-game native NES, GBA and PlayStation runtime/BIOS/disc tests. Those packages remain experimental.
+- More per-game NES, GBA and PlayStation runtime, BIOS and disc tests on target hardware.
 - Network interruption, slow transfer/cancel, low storage and corrupted catalog/cache exercise on target. Security failure checks are useful, but they do not replace all device-level recovery tests.
 - Autosave corruption recovery on a device, beyond retaining backup files and exercising successful resumes.
 - Target-device launcher frame-time/launch-time/memory measurements, core frame pacing and audible audio behavior.
+- Complete the per-console target-device matrix in [CONSOLE_SMOKE_TEST_PLAN.md](CONSOLE_SMOKE_TEST_PLAN.md) before publishing device compatibility claims.
 - Track the signed release workflow status for the specific tag; a local signed runtime walkthrough has passed.
 
 ## Phase status
 
 Phase 1 delivers signed on-demand core acquisition, the original homebrew catalog and keyboard support. Phase 2 has started with filters, cartridge RAM, autosave generations and input cleanup. It is not a claim that profiles, multiplayer, cloud saves, storage management or every roadmap item is finished. Phase 3 has started with reproducible CI/release automation, validation documentation and submission preparation. Official target-device evidence is still a release/hackathon acceptance gate.
+
+## Reproduce the Android bridge integration checks
+
+These instrumented tests require a selected, owned Android x86_64 developer device. Stage test-only assets with `ANDROID_NDK_HOME=… python3 scripts/prepare_android_tests.py`, build `:app:assembleStandardDebug :app:assembleStandardDebugAndroidTest -PincludeX86=true`, install both APKs on the selected serial, then run `adb -s SERIAL shell am instrument -w -r -e class com.fireemu.ConsoleIntegrationTest com.fireemu.test/androidx.test.runner.AndroidJUnitRunner`.
+
+The test APK exercises the real importer, JNI bridge, Android ImageReader video surface, audio callback, input, reset and snapshots. The latest local x86_64 instrumented run passed bridge checks for all nine published systems; its SNES and PS1 diagnostic fixtures returned zero nonzero samples and no visible input change, so these are not audio/gameplay acceptance results. Separate actual-title stress runs are recorded in `v030-actual-game-stress.json`, and actual UI play/save runs in the local artifacts bundle. `importLocalDemoGames` is an optional test fixture helper; it skips unless app-private `files/demo-import` has been explicitly staged on the owned debug device. Its game files are not part of the repository or production APK. Original generated diagnostics are CC0. Additional fixtures are from gilyon/snes-tests v1.4 and JaCzekanski/ps1-tests build-158; retain their upstream terms when sharing test assets.
+
+Settings offers optional low-volume ambient audio and click/focus feedback toggles. UI toggle persistence, Android player start/pause/release state, and click SoundPool activity passed on the local emulator. That emulator's PulseAudio backend did not initialize, so no claim is made about audible output on it; verify sound on the target device. The ambient MP3 is owner-supplied and is not covered by the FireSpot GPL license; see `NOTICE`.

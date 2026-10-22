@@ -1,0 +1,17 @@
+{
+  "scope": "Local AOSP Android 11; keyboard events injected, physical wireless unverified",
+  "checks": [
+    {
+      "check": "Input doctor captures real keys, releases held state and stops on Back",
+      "result": "passed"
+    },
+    {
+      "check": "Storage dashboard reports real usage and clears image cache",
+      "result": "passed"
+    },
+    {
+      "check": "ROMsGames loads inside the app with native return controls",
+      "result": "passed"
+    }
+  ]
+}

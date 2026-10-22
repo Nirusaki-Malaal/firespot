@@ -1,0 +1,29 @@
+{
+  "scope": "Local AOSP Android, not official Fire TV; new cores package-tested, not game-tested",
+  "checks": [
+    {
+      "check": "Catalog keyboard search filters real titles",
+      "result": "passed"
+    },
+    {
+      "check": "Installed-only catalog shows seeded titles without a duplicate download",
+      "result": "passed"
+    },
+    {
+      "check": "Catalog sort controls cycle",
+      "result": "passed"
+    },
+    {
+      "check": "Console browsing uses real zero counts and offers import for an empty system",
+      "result": "passed"
+    },
+    {
+      "check": "New Sega core downloads and passes native CPU/hash checks",
+      "result": "passed"
+    },
+    {
+      "check": "New SNES core downloads and passes native CPU/hash checks",
+      "result": "passed"
+    }
+  ]
+}

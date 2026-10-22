@@ -1,0 +1,21 @@
+{
+  "scope": "Headless AOSP Android 11 x86_64; does not prove audible speaker/headset output",
+  "checks": [
+    {
+      "check": "Ambient audio Settings toggle stops and starts the bundled user-supplied MP3",
+      "result": "passed"
+    },
+    {
+      "check": "Interface sound Settings toggle disables and restores generated click/focus feedback",
+      "result": "passed"
+    },
+    {
+      "check": "Android MediaPlayer entered started/paused/released states; SoundPool click playback events observed",
+      "result": "passed"
+    },
+    {
+      "check": "PulseAudio output initialized on emulator host",
+      "result": "not available"
+    }
+  ]
+}

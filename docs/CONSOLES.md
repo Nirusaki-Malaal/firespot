@@ -8,17 +8,17 @@ The [phase1-v2 release](https://github.com/Nirusaki-Malaal/firespot-cores/releas
 
 | System | Core | FireSpot status |
 |---|---|---|
-| Game Boy | Gambatte | Original games verified on local Android; official Fire TV pending |
-| Game Boy Color | Gambatte | Same installed core; Color-specific game coverage pending |
-| NES / Famicom | FCEUmm | Published experimental Android build; cartridge import enabled; gameplay pending |
-| Game Boy Advance | mGBA | Published experimental Android build; cartridge import enabled; gameplay pending |
-| SNES / Super Famicom | bsnes 2014 Performance | Android native initialization checked; gameplay/device tests pending |
-| Master System | Gearsystem | Android native initialization checked; gameplay/device tests pending |
-| Game Gear | Gearsystem | Same core; gameplay/device tests pending |
-| SG-1000 | Gearsystem | Same core; gameplay/device tests pending |
-| PlayStation | PCSX ReARMed | Published experimental Android build; gameplay/BIOS/disc-import workflow pending |
+| Game Boy | Gambatte | Original and diagnostic gameplay exercised on local Android; Fire TV acceptance pending |
+| Game Boy Color | Gambatte | Diagnostic gameplay exercised on local Android; more color-title coverage pending |
+| NES / Famicom | FCEUmm | Actual-title gameplay, input, audio, save/restore and reset exercised on local Android; Fire TV acceptance pending |
+| Game Boy Advance | mGBA | User-provided FireRed gameplay, controls, saves and resume exercised on local Android; Fire TV acceptance pending |
+| SNES / Super Famicom | bsnes 2014 Performance | Actual-title video/audio/input, save/restore and reset exercised on local Android; target-device checks pending |
+| Master System | Gearsystem | Actual-title video/audio, save/restore and reset exercised on local Android; broader controls and target-device checks pending |
+| Game Gear | Gearsystem | Video and save/restore exercised on local Android; audible output and target-device checks pending |
+| SG-1000 | Gearsystem | Actual-title video/audio and save/restore exercised on local Android; broader controls and target-device checks pending |
+| PlayStation | PCSX ReARMed | Actual-title video/audio and save/restore exercised on local Android; input response, BIOS/disc workflow and target-device checks pending |
 
-Gambatte is the only core included in the optional demo APK. Standard downloads console support. The public release includes each core's exact source archive, commit and license. No BIOS or commercial ROMs are supplied.
+Gambatte is included in the optional bundled Game Boy build. Standard downloads console support. The public release includes each core's exact source archive, commit and license. No BIOS or commercial ROMs are supplied.
 
 ## Expansion candidates
 
@@ -45,7 +45,7 @@ PSP has no published FireSpot binary yet. The active bridge accepts software vid
 3. Verify ELF CPU, required entry points, API level and dependency availability.
 4. Exercise video, audio, input, reset, lifecycle and saves using permitted content.
 5. Validate firmware and multi-file import requirements without distributing proprietary firmware.
-6. Measure the intended Fire TV, then label status accurately in the catalog and docs.
+6. Measure the intended Fire TV and publish the observed compatibility evidence in the catalog and docs.
 7. Publish matching source/licenses and signed artifact metadata before enabling download.
 
 ## Primary references

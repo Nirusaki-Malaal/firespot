@@ -16,7 +16,7 @@ fun OnboardingScreen(viewModel:OnboardingViewModel,onFinish:()->Unit) {
         Column(Modifier.width(540.dp),verticalArrangement=Arrangement.spacedBy(20.dp)) {
             FireSpotIcon("brand",Modifier.size(38.dp))
             Text("Your next little escape.",fontSize=36.sp,fontWeight=FontWeight.Light,color=FireSpotTextPrimary)
-            Text("Two original Game Boy games are already in your library. No ROM upload, account or BIOS needed for the demo.",fontSize=16.sp,lineHeight=24.sp,color=FireSpotTextSecondary)
+            Text("Two original Game Boy games are already in your library. No ROM upload, account or BIOS is needed to start playing.",fontSize=16.sp,lineHeight=24.sp,color=FireSpotTextSecondary)
             Row(horizontalArrangement=Arrangement.spacedBy(24.dp)) {
                 Text("D-PAD  Navigate",color=FireSpotTextPrimary,fontSize=12.sp)
                 Text("SELECT  Confirm",color=FireSpotTextPrimary,fontSize=12.sp)

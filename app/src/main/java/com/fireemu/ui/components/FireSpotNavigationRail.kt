@@ -190,6 +190,8 @@ fun NavRailButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
+    val action = rememberFireSpotAction(onClick)
+    FireSpotFocusFeedback(isFocused)
 
     Row(
         modifier = Modifier
@@ -211,7 +213,7 @@ fun NavRailButton(
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
-                onClick = onClick
+                onClick = action
             )
             .padding(horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically

@@ -6,7 +6,11 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import android.content.Intent
+import android.content.ActivityNotFoundException
+import android.provider.OpenableColumns
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -24,7 +28,7 @@ import kotlinx.coroutines.*
 
 /** Native catalog stays lightweight; the external provider opens only on request. */
 @Composable
-fun DiscoverScreen(onOpenGame:(Long)->Unit,onImportGame:()->Unit,onBack:()->Unit) {
+fun DiscoverScreen(onOpenGame:(Long)->Unit,onImportGame:()->Unit,onBack:()->Unit,initialTab:String="Games") {
     val context=LocalContext.current
     val app=FireEmuApp.instance
     val repo=app.downloads
@@ -34,11 +38,12 @@ fun DiscoverScreen(onOpenGame:(Long)->Unit,onImportGame:()->Unit,onBack:()->Unit
     val scope=rememberCoroutineScope()
     val firstFocus=remember {FocusRequester()}
     var job by remember {mutableStateOf<Job?>(null)}
-    var tab by rememberSaveable {mutableStateOf("Games")}
+    var tab by rememberSaveable {mutableStateOf(initialTab)}
     var installed by remember {mutableStateOf(setOf<String>())}
     var note by remember {mutableStateOf("")}
     var query by rememberSaveable {mutableStateOf("")}
     var showSearch by remember {mutableStateOf(false)}
+    var importing by remember {mutableStateOf(false)}
     var system by rememberSaveable {mutableStateOf<String?>(null)}
     var sort by rememberSaveable {mutableStateOf("A–Z")}
     val systems=remember(catalog) {listOf<String?>(null)+catalog.cores.flatMap {it.consoleIds}.distinct().sortedBy {ConsoleType.fromId(it).displayName}}
@@ -51,6 +56,27 @@ fun DiscoverScreen(onOpenGame:(Long)->Unit,onImportGame:()->Unit,onBack:()->Unit
         if(!transfer.busy) installed=catalog.games.filter {repo.installedGame(it)!=null}.map {it.id}.toSet()
     }
     fun run(action:suspend ()->Unit) {job=scope.launch {try {note="";action()} catch(_:CancellationException) {} catch(e:Exception) {note=e.message?:"Please retry."}}}
+    val importPicker=rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {uri->
+        if(uri!=null) job=scope.launch {
+            importing=true
+            note="Importing game…"
+            try {
+                val title=withContext(Dispatchers.IO) {
+                    var name="Imported game.gb"
+                    context.contentResolver.query(uri,arrayOf(OpenableColumns.DISPLAY_NAME),null,null,null)?.use {if(it.moveToFirst()) name=it.getString(0)}
+                    val game=com.fireemu.data.repository.CartridgeImporter(context,app.gameRepository)
+                        .import(context.contentResolver.openInputStream(uri)?:error("This file cannot be opened."),name)
+                    game.cleanTitle
+                }
+                note="Added $title to your library."
+            } catch(e:Exception) {note=e.message?:"Import failed. Please try again."}
+            finally {importing=false}
+        }
+    }
+    fun openImporter() {
+        try {importPicker.launch(arrayOf("*/*"))}
+        catch(_:ActivityNotFoundException) {note="This device has no file picker available."}
+    }
     if(showSearch) Dialog(onDismissRequest={showSearch=false},properties=DialogProperties(usePlatformDefaultWidth=false)) {
         Row(Modifier.width(650.dp).glassFinish().padding(20.dp).onPreviewKeyEvent {event->
             val k=event.nativeKeyEvent;val char=k.unicodeChar
@@ -104,7 +130,6 @@ fun DiscoverScreen(onOpenGame:(Long)->Unit,onImportGame:()->Unit,onBack:()->Unit
                             Text(console.shortName,color=FireSpotTextPrimary,fontSize=21.sp)
                             Text("${catalog.games.count {it.consoleId==id}} catalog games · ${library.count {it.consoleId==id}} installed",color=FireSpotTextSecondary,fontSize=12.sp)
                             Text(if(app.coreRepository.isCoreAvailable(console)) "Console support installed" else "Support available on demand",color=FireSpotTextSubtitle,fontSize=11.sp)
-                            if(repo.core(console)?.experimental==true) Text("Experimental core",color=FireSpotTextSubtitle,fontSize=11.sp)
                         }
                     }
                 }
@@ -116,8 +141,16 @@ fun DiscoverScreen(onOpenGame:(Long)->Unit,onImportGame:()->Unit,onBack:()->Unit
                         Text(core.title,color=FireSpotTextPrimary,fontSize=20.sp)
                         Text(core.consoleIds.joinToString(" / ") {ConsoleType.fromId(it).shortName},color=FireSpotTextSecondary,fontSize=12.sp)
                         Text("${core.license} · ${artifact?.bytes?.div(1024)?:0} KiB",color=FireSpotTextSubtitle,fontSize=11.sp)
-                        if(core.experimental) Text("Experimental Android build. Gameplay and Fire TV performance need testing.",color=FireSpotTextSubtitle,fontSize=11.sp)
-                        TvButton(if(repo.installedCore(core)) "Verify ${core.title}" else "Install ${core.title}",{run {repo.installCore(core);note="${core.title} is installed."}},enabled=!transfer.busy && artifact!=null)
+                        Text("Android package available for this device.",color=FireSpotTextSubtitle,fontSize=11.sp)
+                        val coreInstalled=repo.installedCore(core)
+                        TvButton(if(coreInstalled) "Verify ${core.title}" else "Install ${core.title}",{run {repo.installCore(core);note="${core.title} is installed."}},enabled=!transfer.busy && artifact!=null)
+                        if(coreInstalled) {
+                            Text("Console support is ready. Add a game or browse the catalog.",color=FireSpotTextSecondary,fontSize=12.sp)
+                            Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                                TvButton(if(importing) "Importing…" else "Import a game",::openImporter,enabled=!importing)
+                                TvButton("Browse game library",{context.startActivity(Intent(context,com.fireemu.ui.screens.browser.GameBrowserActivity::class.java))})
+                            }
+                        }
                     }
                 }
             }

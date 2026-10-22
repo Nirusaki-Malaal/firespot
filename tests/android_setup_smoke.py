@@ -2,7 +2,7 @@ import sys,json
 sys.path.insert(0,str(__import__('pathlib').Path(__file__).resolve().parent))
 import android_demo_smoke as u
 u.shell('am','force-stop','com.fireemu');u.shell('am','start','-n','com.fireemu/com.fireemu.MainActivity');u.wait('Less setup.')
-u.click('Settings');u.wait('Make yourself at home.')
+u.shell('input','tap','80','810');u.wait('Make yourself at home.')
 for _ in range(4):
  t=u.tree()
  if any('Controller & keyboard tester' in x for x in u.texts(t)):break

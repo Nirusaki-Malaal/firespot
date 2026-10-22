@@ -9,3 +9,4 @@ FireSpot project changes are distributed under GPL-3.0-or-later; see LICENSE.
 This notice does not relicense third-party components. Their copyright and license notices remain in force.
 Downloaded emulator cores retain the licenses recorded in the signed catalog and distributed with their matching source in Nirusaki-Malaal/firespot-cores.
 Libretro's API header retains its own permissive notice. Original FireSpot starter/homebrew games and their generator are CC0-1.0; see app/src/main/assets/starter/LICENSE.txt.
+The interface click sound in app/src/main/res/raw was generated for FireSpot and is released under CC0-1.0. The ambient MP3 supplied by the project owner for this build is not covered by the FireSpot GPL license; its rights remain with its respective owner.

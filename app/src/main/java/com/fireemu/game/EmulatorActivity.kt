@@ -64,6 +64,8 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback, android.hardware.in
     private var sessionRecorded = false
     private var frameDurationNs = 16_666_666L
 
+    private var renderBufferWidth = 0
+    private var renderBufferHeight = 0
     private var selectedSlot = 1
     private var currentScaling = VideoScaling.ASPECT_RATIO
     private var sessionStartTime = 0L
@@ -418,7 +420,7 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback, android.hardware.in
                 LibretroBridge.nativeBatteryRam(batteryPath(), false)
                 if (intent.getBooleanExtra(EXTRA_RESUME, false)) checkAndLoadAutoState()
             }
-            check(LibretroBridge.nativeSetSurface(holder.surface, 1280, 720))
+            configureVideoSurface(holder)
             startEmulationLoop()
         } catch (error: Exception) {
             showLaunchError(error.message ?: "The game could not start.")
@@ -434,8 +436,22 @@ class EmulatorActivity : Activity(), SurfaceHolder.Callback, android.hardware.in
             .setOnCancelListener { finish() }.show()
     }
 
+    private fun configureVideoSurface(holder: SurfaceHolder) {
+        val displayWidth=surfaceView.width.takeIf {it>0} ?: 1280
+        val displayHeight=surfaceView.height.takeIf {it>0} ?: 720
+        // Integer compositor enlargement preserves pixel edges and bounds software work.
+        val divisor=maxOf(1,(displayWidth+1279)/1280,(displayHeight+719)/720)
+        val width=maxOf(1,displayWidth/divisor)
+        val height=maxOf(1,displayHeight/divisor)
+        if(width!=renderBufferWidth || height!=renderBufferHeight) {
+            renderBufferWidth=width;renderBufferHeight=height
+            holder.setFixedSize(width,height)
+        }
+        check(LibretroBridge.nativeSetSurface(holder.surface,width,height))
+    }
+
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-        LibretroBridge.nativeSetSurface(holder.surface, width, height)
+        if(coreReady) configureVideoSurface(holder)
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {

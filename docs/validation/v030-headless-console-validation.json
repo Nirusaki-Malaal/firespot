@@ -1,0 +1,104 @@
+{
+  "scope": "Local Android x86_64; diagnostic content, not Fire TV performance or broad game compatibility",
+  "results": [
+    {
+      "system": "gameboy",
+      "import": true,
+      "videoFrames": 192,
+      "audioSamples": 253314,
+      "nonzeroAudio": 17740,
+      "inputChangesVideo": true,
+      "saveRestore": true,
+      "reset": true,
+      "coverage": "Android diagnostic integration passed"
+    },
+    {
+      "system": "gbc",
+      "import": true,
+      "videoFrames": 191,
+      "audioSamples": 253462,
+      "nonzeroAudio": 17740,
+      "inputChangesVideo": true,
+      "saveRestore": true,
+      "reset": true,
+      "coverage": "Android diagnostic integration passed"
+    },
+    {
+      "system": "nes",
+      "import": true,
+      "videoFrames": 220,
+      "audioSamples": 367376,
+      "nonzeroAudio": 367374,
+      "inputChangesVideo": true,
+      "saveRestore": true,
+      "reset": true,
+      "coverage": "Android diagnostic integration passed"
+    },
+    {
+      "system": "gba",
+      "import": true,
+      "videoFrames": 225,
+      "audioSamples": 500992,
+      "nonzeroAudio": 254372,
+      "inputChangesVideo": true,
+      "saveRestore": true,
+      "reset": true,
+      "coverage": "Android diagnostic integration passed"
+    },
+    {
+      "system": "snes",
+      "import": true,
+      "videoFrames": 229,
+      "audioSamples": 245068,
+      "nonzeroAudio": 0,
+      "inputChangesVideo": false,
+      "saveRestore": true,
+      "reset": true,
+      "coverage": "Partial; gameplay acceptance pending"
+    },
+    {
+      "system": "mastersystem",
+      "import": true,
+      "videoFrames": 229,
+      "audioSamples": 337580,
+      "nonzeroAudio": 300400,
+      "inputChangesVideo": true,
+      "saveRestore": true,
+      "reset": true,
+      "coverage": "Android diagnostic integration passed"
+    },
+    {
+      "system": "gamegear",
+      "import": true,
+      "videoFrames": 227,
+      "audioSamples": 337580,
+      "nonzeroAudio": 300372,
+      "inputChangesVideo": true,
+      "saveRestore": true,
+      "reset": true,
+      "coverage": "Android diagnostic integration passed"
+    },
+    {
+      "system": "sg1000",
+      "import": true,
+      "videoFrames": 228,
+      "audioSamples": 337580,
+      "nonzeroAudio": 300424,
+      "inputChangesVideo": true,
+      "saveRestore": true,
+      "reset": true,
+      "coverage": "Android diagnostic integration passed"
+    },
+    {
+      "system": "ps1",
+      "import": true,
+      "videoFrames": 2,
+      "audioSamples": 337700,
+      "nonzeroAudio": 0,
+      "inputChangesVideo": false,
+      "saveRestore": true,
+      "reset": true,
+      "coverage": "Partial; gameplay acceptance pending"
+    }
+  ]
+}

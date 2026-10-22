@@ -47,6 +47,7 @@ fun FireEmuNavGraph(
     val app = FireEmuApp.instance
     val context = LocalContext.current
     var showExitDialog by remember { mutableStateOf(false) }
+    val sharedLibraryModel = screenViewModel(key = "shared-library") { HomeViewModel(app.getGamesUseCase) }
 
     fun launchGame(game: Game, resumeState: Boolean) {
         val intent = Intent(context, EmulatorActivity::class.java).apply {
@@ -70,7 +71,7 @@ fun FireEmuNavGraph(
         when (tab) {
             LeftRailTab.HOME -> railRoute(Screen.Home.route)
             LeftRailTab.LIBRARY -> railRoute(Screen.Games.route)
-            LeftRailTab.CONSOLES -> railRoute(Screen.Discover.route)
+            LeftRailTab.CONSOLES -> railRoute(Screen.Consoles.route)
             LeftRailTab.GAMES -> railRoute(Screen.Favorites.route)
             LeftRailTab.SETTINGS -> railRoute(Screen.Settings.route)
         }
@@ -126,7 +127,7 @@ fun FireEmuNavGraph(
                 showExitDialog = true
             }
 
-            val viewModel = screenViewModel { HomeViewModel(app.getGamesUseCase) }
+            val viewModel = sharedLibraryModel
             HomeScreen(
                 viewModel = viewModel,
                 onSelectConsole = { consoleId ->
@@ -148,23 +149,18 @@ fun FireEmuNavGraph(
 
         // 4. Consoles Screen (Grid)
         composable(Screen.Consoles.route) {
-            BackHandler { navController.navigate(Screen.Home.route) }
-            val viewModel = screenViewModel { HomeViewModel(app.getGamesUseCase) }
-            val uiState by viewModel.uiState.collectAsState()
-            FilteredGridScreen(
-                title = "All Consoles",
-                subtitle = "Browse by Emulated System",
-                activeRailTab = LeftRailTab.CONSOLES,
-                games = uiState.allGames,
-                onSelectGame = { navController.navigate(Screen.Details.createRoute(it)) },
-                onSelectRailTab = { handleRailNavigation(it) }
+            com.fireemu.ui.screens.discover.DiscoverScreen(
+                initialTab = "Consoles",
+                onOpenGame = { navController.navigate(Screen.Details.createRoute(it)) },
+                onImportGame = { navController.navigate(Screen.Settings.route) },
+                onBack = { navController.popBackStack() }
             )
         }
 
         // 5. Games Screen (All titles Grid)
         composable(Screen.Games.route) {
             BackHandler { navController.navigate(Screen.Home.route) }
-            val viewModel = screenViewModel { HomeViewModel(app.getGamesUseCase) }
+            val viewModel = sharedLibraryModel
             val uiState by viewModel.uiState.collectAsState()
             FilteredGridScreen(
                 title = "Your library",
@@ -179,7 +175,7 @@ fun FireEmuNavGraph(
         // 6. Favorites Screen
         composable(Screen.Favorites.route) {
             BackHandler { navController.navigate(Screen.Home.route) }
-            val viewModel = screenViewModel { HomeViewModel(app.getGamesUseCase) }
+            val viewModel = sharedLibraryModel
             val uiState by viewModel.uiState.collectAsState()
             FilteredGridScreen(
                 title = "Favorites",

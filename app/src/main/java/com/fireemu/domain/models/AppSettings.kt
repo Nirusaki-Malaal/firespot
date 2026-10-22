@@ -16,5 +16,7 @@ data class AppSettings(
     val audioBufferSize: Int = 1600,
     val fastForwardSpeed: Float = 2.0f,
     val autoSaveOnExit: Boolean = true,
-    val isOnboardingCompleted: Boolean = false
+    val isOnboardingCompleted: Boolean = false,
+    val uiAmbientEnabled: Boolean = true,
+    val uiSoundsEnabled: Boolean = true
 )

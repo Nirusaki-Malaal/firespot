@@ -2,11 +2,13 @@
 
 FireSpot is a Kotlin/Compose TV launcher connected to a native Libretro frontend. The active app is `app/`; `emulator/_shared/src/main/jni` supplies the native bridge. The public core catalog lives in [firespot-cores](https://github.com/Nirusaki-Malaal/firespot-cores). This document describes the implemented app; planned work is in IMPLEMENTATION_PLAN.md.
 
+Current local Android captures of Home, Discover, the input tester, and storage/playtime are in [docs/screenshots/current](screenshots/current/). These are app screenshots from a TV-profile emulator, not official Fire TV acceptance evidence.
+
 ## Installation
 
-Get an APK from the project Releases page. Standard (`com.fireemu`) and demo (`com.fireemu.demo`) can coexist and have independent libraries/settings/saves. Both release APKs target Android API 28+ and include ARMv7, ARM64 and x86_64 support. An Android APK targets Fire OS; it does not become a Vega OS app automatically.
+Get an APK from the project Releases page. Standard (`com.fireemu`) and bundled Game Boy (`com.fireemu.demo`) builds can coexist and have independent libraries/settings/saves. Both release APKs target Android API 28+ and include ARMv7, ARM64 and x86_64 support. An Android APK targets Fire OS; it does not become a Vega OS app automatically.
 
-The standard app contains the native frontend bridge, not emulator cores. On first Play it obtains the matching signed core, validates it, and opens the game. An internet connection is needed for the first download. The demo packages Gambatte for the two original Game Boy starter games. Once installed, games and cores are local; play, saves and settings need no account or network.
+The standard app contains the native frontend bridge, not emulator cores. On first Play it obtains the matching signed core, validates it, and opens the game. An internet connection is needed for the first download. The bundled Game Boy build packages Gambatte for the two original starter games. Once installed, games and cores are local; play, saves and settings need no account or network.
 
 For a developer-controlled ADB device:
 
@@ -16,15 +18,15 @@ adb -s YOUR_SERIAL install -r firespot-standard.apk
 adb -s YOUR_SERIAL shell am start -n com.fireemu/com.fireemu.MainActivity
 ```
 
-Release APKs have a separate stable distribution signing key. Earlier debug APKs may have a different certificate. Android will reject an in-place update with a mismatched certificate. Preserve any needed data before deliberately uninstalling a debug build; `adb uninstall` removes its private saves. Standard and demo builds also use different application IDs.
+Release APKs have a separate stable distribution signing key. Earlier debug APKs may have a different certificate. Android will reject an in-place update with a mismatched certificate. Preserve any needed data before deliberately uninstalling a debug build; `adb uninstall` removes its private saves. Standard and bundled Game Boy builds also use different application IDs.
 
-An Amazon virtual-device session can accept the self-contained demo APK without a separate ROM/core upload. Amazon remote-session authentication and temporary ADB connectivity are separate from FireSpot's unauthenticated public game downloads. See AWS_TESTING_SETUP.md and PHASE_0.md for the earlier setup record. Never put AWS credentials into the APK.
+An Amazon virtual-device session can accept the bundled Game Boy APK without a separate ROM/core upload. Amazon remote-session authentication and temporary ADB connectivity are separate from FireSpot's unauthenticated public game downloads. See AWS_TESTING_SETUP.md and PHASE_0.md for setup details. Never put AWS credentials into the APK.
 
 ## First play
 
 1. Open FireSpot and finish its welcome screen.
 2. Choose Open library. Orbit Collector and Pocket Courier are seeded idempotently, preserving existing progress and favorites.
-3. Open a title and choose Play from start. Standard obtains console support if needed; demo uses its bundled Game Boy core.
+3. Open a title and choose Play from start. Standard obtains console support if needed; the bundled Game Boy build uses its included core.
 4. Use the D-pad or a keyboard to move. Menu/Back/Escape opens pause.
 5. Save & Exit returns to game details. Resume appears when a nonempty autosave is available.
 
@@ -36,7 +38,9 @@ Open Discover games from Home or Discover games & console support from Settings.
 
 Discover has Games, Consoles, Installed and Console support views. Search by title, description, author or genre; filter by console and sort alphabetically, by download size or release year. Console cards show actual catalog and installed-game counts. An empty system offers an import action.
 
-Console support lists the six published cores. Each package is selected for the running process ABI, rather than assuming a 64-bit-capable CPU means a 64-bit app process. Unsupported ABIs have no install action. Experimental packages are labeled: a compiled core is not proof of gameplay, BIOS readiness or Fire TV performance.
+Console support lists the published cores. Each package is selected for the running process ABI, rather than assuming a 64-bit-capable CPU means a 64-bit app process. Unsupported ABIs have no install action. A downloadable binary confirms package availability only; use the [console matrix](CONSOLES.md) and [validation record](VALIDATION.md) for title and device test results.
+
+After a core is installed, its card provides **Import a game** to open the file picker and **Browse game library** to open the in-app ROMsGames browser. Imported titles are validated and copied into the app library; supported catalog downloads follow the same import path.
 
 Refresh catalog fetches the signed remote catalog. A verified embedded catalog remains available offline. A valid newer cached revision takes precedence over the embedded one; rollback to an older revision is rejected. Installed local files remain usable when refresh fails.
 
@@ -44,7 +48,7 @@ Downloads show status, percentage, cancellation and a specific failure message. 
 
 ## Import your cartridges
 
-Settings → Import a game uses the system's Android document provider. Supported imports are `.gb`, `.gbc`, `.nes`, `.gba`, `.sfc`, `.smc`, `.sms`, `.gg` and `.sg` cartridges. GB/GBC imports are limited to 8 MiB; other cartridge imports to 32 MiB. The importer validates basic file shape (including the iNES header/declared payload), bounds reads, hashes content, writes to a temporary file and then renames it. Files are copied into private app storage; losing the original file or picker permission does not remove that copy.
+Settings → Import a game, or **Import a game** on an installed console card, uses the system's Android document provider. Supported imports are `.gb`, `.gbc`, `.nes`, `.gba`, `.sfc`, `.smc`, `.sms`, `.gg` and `.sg` cartridges. GB/GBC imports are limited to 8 MiB; other cartridge imports to 32 MiB. The importer validates basic file shape (including the iNES header/declared payload), bounds reads, hashes content, writes to a temporary file and then renames it. Files are copied into private app storage; losing the original file or picker permission does not remove that copy.
 
 Importing the same bytes again reuses their content-derived destination and library record. Import does not download arbitrary web URLs or treat a filename as proof of compatibility. A cartridge may still fail core loading or use unsupported peripherals. Disc sets, M3U playlists and PS1 CUE/BIN sidecar sets need a separate transfer/import flow and are not exposed as a supported one-file cartridge import.
 
@@ -74,6 +78,8 @@ In launcher menus, arrows/Tab navigate and Enter activates. Printable keys type 
 Bluetooth and USB keyboards use Android input events; pairing is performed in the operating system, not inside FireSpot. No Bluetooth scanning permission is required to receive normal keyboard events. Physical Bluetooth latency/reconnection behavior still needs device testing. Input is cleared on focus loss, pause and input-device changes/removal to avoid held directions. Multiple keys mapped to the same game action are tracked separately, so releasing one does not release the other.
 
 Settings → Remap controls captures a key for each exposed game control, including X/Y/L/R. Reset Defaults restores the stored controller defaults; fixed keyboard/remote fallbacks remain available. Menu, Back, Home, Escape and F1 remain navigation/pause keys. Analog stick-to-D-pad conversion uses a fixed dead zone; per-controller calibration and multiple-player routing are future work.
+
+Settings also includes separate ambient-audio and interface-feedback toggles. Ambient audio runs at low volume while browsing and pauses when gameplay starts. Focus/click feedback uses short sound and supported device haptics. Actual speaker/headset output should be checked on the intended Fire TV device.
 
 ## Saves and recovery
 
@@ -137,11 +143,33 @@ The catalog signing key and APK signing key are different credentials. Neither b
 |---|---|
 | First Play cannot prepare console support | Check connectivity, free space and catalog status; retry from details |
 | Invalid signature/hash/CPU | Retry the published release; do not bypass validation |
-| Picker absent | Use seeded/downloadable titles; do not rely on ROM upload for the demo |
-| Core loads but a game fails | Check console, format, required BIOS and experimental status |
+| Picker absent | Use seeded/downloadable titles for initial testing; do not rely on ROM upload |
+| Core loads but a game fails | Check console, format, required BIOS and the compatibility notes in the console matrix |
 | No sound in a local headless test | The recorded emulator session uses `-no-audio`; host callback tests prove generated samples, not speaker output |
 | Held direction after device loss | Pause/resume; report device/input details if it persists |
 | Update rejected by Android | Check application ID and signer before removing an installed build |
 | Autosave damaged | Resume automatically tries retained backups; preserve files before manual recovery |
 
 Do not publish AWS credentials, release keystores, signing passwords, user ROMs or private save files in bug reports.
+
+## Input doctor
+
+Open Settings → Controller & keyboard tester. The device list updates when Android reports a connection, disconnection or configuration change. Start live test to capture key-down/key-up events, held buttons and raw joystick axes, including Android's reported flat threshold. Back or Escape stops capture before leaving the page. Leaving the screen or pausing the app removes capture, so normal navigation and gameplay keep their existing bindings. Pair a Bluetooth device in the TV's system settings. This tool does not pair devices, write calibration or create per-device mapping profiles.
+
+## Storage and playtime
+
+Settings → Storage & playtime shows managed game, core, snapshot/recovery, battery-save and image-cache bytes, plus filesystem free space. Refresh calculates folder sizes off the UI thread. Clear image cache uses Coil's cache APIs and preserves cartridges, console software and progress. The page also shows library/favorite counts, total recorded playtime and the ten most-played games. Session totals update when gameplay ends. Folder totals exclude the APK, database, preferences and external cartridge locations.
+
+## ROMsGames browser and ZIP import
+
+Discover → ROMsGames library or Settings → Browse ROMsGames opens the provider inside FireSpot. Navigate its console and game pages, complete any provider challenge, select a supported download and confirm import. After the status says the game was added, choose My library, return Home and open Library. The first Play downloads the console core if needed. Browsing the website is separate from the signed original-game catalog.
+
+Documents import and website downloads share the same bounded importer. A ZIP must contain exactly one supported cartridge/image. GB/GBC imports are limited to 8 MiB, most other cartridges to 32 MiB, PS-X executables to 4 MiB, and PS1 ISO/PBP files/browser downloads to 768 MiB. Multiple-disc sets and BIOS-dependent titles need further setup. Website listings for NDS, PSP, PS2 and other unavailable consoles do not add emulation support.
+
+## Runtime memory and rendering
+
+Navigation-owned ViewModels cancel work when their entries are cleared. Rail navigation reuses destinations instead of indefinitely stacking screens. Cover images decode at 480×320 or smaller and the memory cache uses at most 8% of the heap, capped at 16 MiB, and clears when the UI is hidden. The external browser is created on demand and destroyed on exit. No backdrop blur or continuously animated textures run in the launcher.
+
+Software video reuses a horizontal source-pixel map, converts each unique scaled source row once and copies repeated rows. Letterbox clearing touches borders rather than clearing the full output before drawing it again. This reduces redundant pixel conversion for handheld-size games; it is not a target-device FPS guarantee. Frame timing and memory measurements must identify device and build type.
+
+Home and the rail's collection views share a lifecycle-owned library ViewModel, avoiding four separate library query/sort pipelines. The external website uses a separate `:browser` process so its Chromium working set is independent of the launcher/game heap. Android may retain that process in its cache after exit and reclaims it under pressure; destroying a WebView does not guarantee immediate process memory reclamation.

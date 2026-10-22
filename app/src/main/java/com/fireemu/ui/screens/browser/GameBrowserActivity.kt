@@ -59,7 +59,7 @@ class GameBrowserActivity : ComponentActivity() {
             webViewClient=object:WebViewClient() {
                 override fun shouldOverrideUrlLoading(view:WebView, request:WebResourceRequest):Boolean {
                     // Keep browsing on the requested provider. Ad schemes and unrelated popup pages stay out.
-                    if(request.isForMainFrame && !providerPage(request.url) && !downloadLink(request.url)) {status.text="That external page is outside the game library.";return true}
+                    if(request.isForMainFrame && !providerPage(request.url) && !downloadLink(request.url)) {status.text="Blocked external page: ${request.url.host ?: "unknown host"}. Return to ROMsGames or your library.";return true}
                     return false
                 }
                 override fun onReceivedError(view:WebView,request:WebResourceRequest,error:WebResourceError) {
@@ -84,8 +84,11 @@ class GameBrowserActivity : ComponentActivity() {
         onBackPressedDispatcher.addCallback(this,object:OnBackPressedCallback(true) {override fun handleOnBackPressed()=goBack()})
         web.loadUrl(intent.getStringExtra("url")?.takeIf {providerPage(Uri.parse(it))} ?: HOME)
     }
-    private fun providerPage(uri:Uri)=uri.scheme=="https" && (uri.host=="www.romsgames.net" || uri.host=="romsgames.net")
-    private fun downloadLink(uri:Uri)=uri.scheme=="https" && (uri.lastPathSegment?.substringAfterLast('.')?.lowercase() in (CartridgeImporter.extensions + "zip"))
+    private fun providerPage(uri:Uri)=uri.scheme=="https" && uri.host?.let {it=="romsgames.net" || it.endsWith(".romsgames.net")}==true
+    private fun downloadLink(uri:Uri)=uri.scheme=="https" && (
+        uri.lastPathSegment?.substringAfterLast('.')?.lowercase() in (CartridgeImporter.extensions + "zip") ||
+        uri.host?.let { it=="downloadroms.io" || it.endsWith(".downloadroms.io") }==true || uri.getQueryParameter("mediaAttach")!=null
+    )
     private fun Int.dp()=(this*resources.displayMetrics.density).toInt()
     private fun goBack() {if(web.canGoBack())web.goBack() else finish()}
     override fun onKeyUp(keyCode:Int,event:KeyEvent):Boolean {

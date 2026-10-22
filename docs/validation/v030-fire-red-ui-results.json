@@ -1,0 +1,55 @@
+{
+  "scope": "Local Android 11 x86_64; user-provided FireRed; keyboard-injected input",
+  "checks": [
+    "cartridge imported with file provider",
+    "on-demand mGBA download and launch",
+    "overworld keyboard movement",
+    "manual save/load",
+    "scaling modes",
+    "frame counter",
+    "controls guide",
+    "autosave exit and resume"
+  ],
+  "markers": [
+    {
+      "seconds": 0.0,
+      "label": "Pok\u00e9mon FireRed \u00b7 GBA \u00b7 User-provided cartridge"
+    },
+    {
+      "seconds": 13.78,
+      "label": "Keyboard movement and game actions"
+    },
+    {
+      "seconds": 16.41,
+      "label": "Pause \u00b7 four save slots \u00b7 scaling \u00b7 controls"
+    },
+    {
+      "seconds": 21.4,
+      "label": "Manual checkpoint saved"
+    },
+    {
+      "seconds": 33.03,
+      "label": "Saved checkpoint restored"
+    },
+    {
+      "seconds": 40.2,
+      "label": "Integer scaling"
+    },
+    {
+      "seconds": 44.3,
+      "label": "Fill scaling"
+    },
+    {
+      "seconds": 50.68,
+      "label": "Frame counter"
+    },
+    {
+      "seconds": 78.44,
+      "label": "Autosave and return to library"
+    },
+    {
+      "seconds": 87.4,
+      "label": "Resume after leaving gameplay"
+    }
+  ]
+}

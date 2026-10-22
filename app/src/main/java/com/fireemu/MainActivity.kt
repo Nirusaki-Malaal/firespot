@@ -7,12 +7,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
 import com.fireemu.ui.navigation.FireEmuNavGraph
 import com.fireemu.ui.theme.FireSpotTheme
+import com.fireemu.ui.audio.FireSpotAudio
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     var inputInspector: ((android.view.InputEvent) -> Boolean)? = null
+    private var uiAudioJob: Job? = null
+
+    override fun onStart() {
+        super.onStart()
+        uiAudioJob = lifecycleScope.launch {
+            FireEmuApp.instance.settingsRepository.getSettings().collectLatest { settings ->
+                FireSpotAudio.setSoundsEnabled(settings.uiSoundsEnabled)
+                FireSpotAudio.setAmbientEnabled(this@MainActivity, settings.uiAmbientEnabled)
+            }
+        }
+    }
+
+    override fun onStop() {
+        uiAudioJob?.cancel()
+        uiAudioJob = null
+        FireSpotAudio.pauseAmbient()
+        super.onStop()
+    }
 
     override fun dispatchGenericMotionEvent(event: android.view.MotionEvent): Boolean {
         if (inputInspector?.invoke(event) == true) return true

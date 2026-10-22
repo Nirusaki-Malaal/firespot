@@ -1,6 +1,6 @@
 # Feature priorities after 0.2.0
 
-This is proposed work, not a claim that these features are available. Finish target-device acceptance before widening the demo's promises. The existing app already has discovery/downloads, search, favorites, history, filters, keyboard input, remapping, four save slots, autosave generations, cartridge RAM and display scaling.
+This is proposed work, not a claim that these features are available. Finish target-device acceptance before widening the app's compatibility claims. The existing app already has discovery/downloads, search, favorites, history, filters, keyboard input, remapping, four save slots, autosave generations, cartridge RAM and display scaling.
 
 ## Highest user value
 
@@ -26,6 +26,12 @@ This is proposed work, not a claim that these features are available. Finish tar
 
 ## Presentation extras after the core works
 
-An attract/demo mode with original game clips, a short first-play controller check, contextual recovery instructions, a simple playtime view and an exportable redacted diagnostics report can improve the experience without overwhelming Home. Any new visible action should be demonstrated end to end before appearing in a hackathon video.
+An attract mode with original game clips, a short first-play controller check, contextual recovery instructions, a simple playtime view and an exportable redacted diagnostics report can improve the experience without overwhelming Home. Any new visible action should be exercised end to end before appearing in a hackathon submission.
 
 More controls on a screen are not automatically a better product. Prioritize complete journeys: get a game, get its console support, play with the available input device, preserve progress, and recover when something fails.
+
+## Feature pass after console browsing
+
+Implemented in source: input doctor (device inventory and live keys/axes), storage usage/free space, image-cache cleanup and most-played summary. Per-device profiles/calibration, portable-save restore, phone upload, family profiles and persistent download queues remain future work. Final build, lint and device acceptance are deferred until the feature pass ends.
+
+The browser/import and diagnostic features listed above are implemented. Download queue persistence, phone transfer, save export/import, family profiles and multiplayer remain roadmap items; they are not represented by inactive buttons in the release UI.

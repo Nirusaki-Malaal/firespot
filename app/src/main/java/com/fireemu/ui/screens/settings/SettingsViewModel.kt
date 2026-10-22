@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class SettingsViewModel(
@@ -65,6 +66,20 @@ class SettingsViewModel(
         viewModelScope.launch {
             val current = settings.value.showFps
             settingsUseCase.setFpsVisible(!current)
+        }
+    }
+
+    fun toggleUiAmbient() {
+        viewModelScope.launch {
+            val current = settingsUseCase.settingsFlow.first()
+            settingsUseCase.updateSettings(current.copy(uiAmbientEnabled = !current.uiAmbientEnabled))
+        }
+    }
+
+    fun toggleUiSounds() {
+        viewModelScope.launch {
+            val current = settingsUseCase.settingsFlow.first()
+            settingsUseCase.updateSettings(current.copy(uiSoundsEnabled = !current.uiSoundsEnabled))
         }
     }
 }
