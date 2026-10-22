@@ -1,0 +1,12 @@
+[
+  {
+    "file": "orbit-collector.gb",
+    "title": "Orbit Collector",
+    "description": "An original pocket arcade game. Move the round explorer onto each diamond checkpoint to score. D-pad moves; Select or A makes a tone. Pause with Menu."
+  },
+  {
+    "file": "pocket-courier.gb",
+    "title": "Pocket Courier",
+    "description": "A faster original checkpoint course. Deliver your marker to the diamond and keep collecting points. D-pad moves; Select or A makes a tone. Pause with Menu."
+  }
+]
