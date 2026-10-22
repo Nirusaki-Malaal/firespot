@@ -1,13 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.fireemu"
+   
     android:versionCode="1"
     android:versionName="1.0.0">
-
-    <!-- Fire OS 7/8 Hard Constraints: minSdk 28, targetSdk 30-33 -->
-    <uses-sdk
-        android:minSdkVersion="28"
-        android:targetSdkVersion="30" />
 
     <!-- Leanback & TV Hardware Requirements: Touchscreen NOT required -->
     <uses-feature
@@ -24,6 +19,7 @@
         android:required="false" />
 
     <!-- Storage & Audio Permissions for Fire OS (Internal + USB OTG) -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
@@ -34,8 +30,8 @@
     <application
         android:name=".FireEmuApp"
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
-        android:banner="@drawable/banner"
+        android:icon="@drawable/ic_launcher_mono"
+        android:banner="@drawable/banner_mono"
         android:label="@string/app_name"
         android:theme="@style/Theme.FireSpot"
         android:requestLegacyExternalStorage="true"
@@ -59,7 +55,6 @@
         <!-- Game Runtime Process (android:process=":game"): Isolated to free Launcher RAM budget -->
         <activity
             android:name=".game.EmulatorActivity"
-            android:process=":game"
             android:screenOrientation="landscape"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:launchMode="singleTask"
@@ -70,7 +65,7 @@
             android:name=".ui.screens.settings.LicensesActivity"
             android:screenOrientation="landscape"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
-            android:launchMode="false"
+            android:launchMode="standard"
             android:exported="false" />
     </application>
 </manifest>
